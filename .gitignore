@@ -1,0 +1,16 @@
+Rhistory
+RData
+.RDataTmp
+.RData
+.Rhistory
+*.RData
+*.Rhistory
+.Rproj.user/
+*.bed
+*.bed.gz
+*.csv
+*.png
+*.tsv
+.Data/
+.Graphs/
+*.csv

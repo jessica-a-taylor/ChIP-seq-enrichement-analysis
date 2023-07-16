@@ -1,0 +1,67 @@
+# Function to get filtered expression data for each set of sample genes in each tissue. 
+PlantExp <- function(dataToUse, exLevel, analysis) {
+
+  sampleGeneSets <- names(dataToUse)
+
+  # Create a list of files in the folder for a particular tissue type.
+  filenames <- list.files(path = "Data\\PlantExp data\\Control\\" ,pattern="*.tsv")
+  expressionData <- data.frame()
+  
+  # Merge the data from all files.
+  for (file in filenames) {
+    expressionData <- rbind(expressionData, as.data.frame(read_tsv(paste("Data\\PlantExp data\\Control\\", file, sep = ""), show_col_types = FALSE)))
+  }
+  
+  # For each set of sample genes...
+  for (test in sampleGeneSets) {
+    PlantExpData <- data.frame()
+    
+    # Filter for the genes in the sample gene set.
+    sampleData <- expressionData[c(which(expressionData$geneId %in% dataToUse[[test]]$Gene)),]
+    sampleData <- sampleData[,-c(2,3,5)]
+    sampleData <- sampleData[order(sampleData$geneId),]
+    
+    # For each gene, calculate the mean expression across experiments.
+    for (gene in unique(sampleData$geneId)) {
+      df <- sampleData[sampleData$geneId==gene,]
+      
+      
+      PlantExpData <- rbind(PlantExpData, data.frame(geneId = gene,
+                                                     FPKM = mean(df$FPKM)))
+    }
+    # Add a column to PlantExpData with the expression level of each gene.
+    expressionLevel <- c()
+    
+    for (row in 1:nrow(PlantExpData)) {
+      if (0 <= PlantExpData[row, "FPKM"] & PlantExpData[row, "FPKM"] <= 1) {
+        expressionLevel <- append(expressionLevel, "No Expression")
+      }
+      else if (1 < PlantExpData[row, "FPKM"] & PlantExpData[row, "FPKM"] <= 50) {
+        expressionLevel <- append(expressionLevel, "Low Expression")
+      }
+      else if (50 < PlantExpData[row, "FPKM"] & PlantExpData[row, "FPKM"] <= 100) {
+        expressionLevel <- append(expressionLevel, "Intermediate Expression")
+      }
+      else if (PlantExpData[row, "FPKM"] > 100) {
+        expressionLevel <- append(expressionLevel, "High Expression")
+      }
+    }
+    
+    PlantExpData <- cbind(PlantExpData, data.frame(ExpressionLevel = expressionLevel))
+    
+    # Sort genes to hashes based on expression level.
+    for (level in exLevel) {
+      df <- PlantExpData[PlantExpData$ExpressionLevel==level,]
+      dataToUse[[paste(test, "_", level, sep = "")]] <- dataToUse[[test]][c(which(dataToUse[[test]]$Gene %in% df$geneId)),]
+      
+      dataToUse[[paste(test, "_", level, sep = "")]] <- cbind(dataToUse[[paste(test, "_", level, sep = "")]], df[,c(2:3)])
+    } 
+  }
+  if (analysis == "sampleGenes") {
+    write.csv(PlantExpData, file = paste("Data\\PlantExp data\\", "R-gene expression data.csv", sep = ""))
+  }
+  else if (analysis == "allClusterGenes") {
+    write.csv(PlantExpData, file = paste("Data\\PlantExp data\\", "All cluster genes expression data.csv", sep = ""))
+  }
+  return(dataToUse)
+}
