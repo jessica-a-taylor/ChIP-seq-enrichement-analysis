@@ -32,17 +32,17 @@ for (level in unique(allGenes$Expression)) {
   controlGenes1 <- controlGenes[controlGenes$Expression == level,]
   Rgenes1 <- Rgenes[Rgenes$Expression == level,]
   
-  for (exp in unique(allGenes$`Mod/TF`)) {
+  for (mod in unique(allGenes$`Mod.TF`)) {
     
-    controlGenes2 <- controlGenes1[controlGenes1$`Mod/TF` == exp,]
-    Rgenes2 <- Rgenes1[Rgenes1$`Mod/TF` == exp,]
+    controlGenes2 <- controlGenes1[controlGenes1$`Mod.TF` == mod,]
+    Rgenes2 <- Rgenes1[Rgenes1$`Mod.TF` == mod,]
     
     for (region in unique(allGenes$Region)) {
       controlGenes3 <- controlGenes2[controlGenes2$Region == region,]
       Rgenes3 <- Rgenes2[Rgenes2$Region == region,]
       
       ExpressionGenes <- rbind(ExpressionGenes, data.frame(Region = rep(region, time = 2),
-                                                           `Mod/TF` = rep(exp, times = 2),
+                                                           `Mod.TF` = rep(mod, times = 2),
                                                            Proportion = c(mean(controlGenes3$Proportion), mean(Rgenes3$Proportion)),
                                                            axisGroup = rep(unique(controlGenes3$axisGroup), times = 2),
                                                            Expression = rep(unique(controlGenes3$Expression), times = 2),
@@ -66,10 +66,10 @@ my_comparisons <- list(c("Control gene \nNo Expression", "R-gene \nNo Expression
                        c("Control gene \nLow Expression", "R-gene \nLow Expression"), 
                        c("R-gene \nNo Expression", "R-gene \nLow Expression"))
 
-for (exp in unique(allGenes$)) {
-  df <- ExpressionGenes[ExpressionGenes$`Mod/TF`==exp,]
+for (mod in unique(allGenes$`Mod.TF`)) {
+  df <- ExpressionGenes[ExpressionGenes$`Mod.TF`==mod,]
   
-  comparison_df <- allGenes[allGenes$`Mod/TF`==exp,]
+  comparison_df <- allGenes[allGenes$`Mod.TF`==mod,]
   
   stat.test <- comparison_df %>% group_by(axisGroup) %>% 
     t_test(Proportion ~ Comparison, comparisons = my_comparisons) %>% 
@@ -77,7 +77,7 @@ for (exp in unique(allGenes$)) {
   
   plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average proportion of gene region",
                     color = "black", fill = "Comparison", 
-                    palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), title = exp) + 
+                    palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), title = mod) + 
     stat_pvalue_manual(
       stat.test, 
       label = "p.adj.signif", size = 4,
@@ -98,6 +98,6 @@ for (exp in unique(allGenes$)) {
   plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "Gene set",
                 font.ytickslab = 12)
   
-  ggsave(paste("Graphs\\Enrichment\\", analysis, "\\", exp, "_Controls vs R-genes.png", sep = ""), plot = plot, width = 10, height = 4)  
+  ggsave(paste("Graphs\\Enrichment\\", analysis, "\\", mod, "_Controls vs R-genes.png", sep = ""), plot = plot, width = 10, height = 4)  
 }
 
