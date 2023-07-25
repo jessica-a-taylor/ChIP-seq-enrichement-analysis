@@ -1,15 +1,15 @@
 # Function to get filtered expression data for each set of sample genes in each tissue. 
-PlantExp <- function(dataToUse, exLevel, analysis) {
+PlantExp <- function(dataToUse, exLevel) {
 
   sampleGeneSets <- names(dataToUse)
 
   # Create a list of files in the folder for a particular tissue type.
-  filenames <- list.files(path = "Data\\PlantExp data\\Control\\" ,pattern="*.tsv")
+  filenames <- list.files(path = "PlantExp data\\Control\\" ,pattern="*.tsv")
   expressionData <- data.frame()
   
   # Merge the data from all files.
   for (file in filenames) {
-    expressionData <- rbind(expressionData, as.data.frame(read_tsv(paste("Data\\PlantExp data\\Control\\", file, sep = ""), show_col_types = FALSE)))
+    expressionData <- rbind(expressionData, as.data.frame(read_tsv(paste("PlantExp data\\Control\\", file, sep = ""), show_col_types = FALSE)))
   }
   
   # For each set of sample genes...
@@ -57,11 +57,7 @@ PlantExp <- function(dataToUse, exLevel, analysis) {
       dataToUse[[paste(test, "_", level, sep = "")]] <- cbind(dataToUse[[paste(test, "_", level, sep = "")]], df[,c(2:3)])
     } 
   }
-  if (analysis == "sampleGenes") {
-    write.csv(PlantExpData, file = paste("Data\\PlantExp data\\", "R-gene expression data.csv", sep = ""))
-  }
-  else if (analysis == "allClusterGenes") {
-    write.csv(PlantExpData, file = paste("Data\\PlantExp data\\", "All cluster genes expression data.csv", sep = ""))
-  }
+  write.csv(PlantExpData, file = "PlantExp data.csv")
+  
   return(dataToUse)
 }

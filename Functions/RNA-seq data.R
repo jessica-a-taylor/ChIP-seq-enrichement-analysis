@@ -1,4 +1,4 @@
-RNA_seqAnalysis <- function(dataToUse, exLevel, analysis) {
+RNA_seqAnalysis <- function(dataToUse, exLevel) {
   
   treatments <- c("Mock", "untreated", "control", "Not treated", "mock", "unstressed control", "none",
                   "normal condition","healthy", "NA")
@@ -10,7 +10,7 @@ RNA_seqAnalysis <- function(dataToUse, exLevel, analysis) {
   for (test in names(dataToUse)) {
     print(test)
     
-    expressionData[[test]] <- as.data.frame(read_csv(paste("Data\\RNA-seq data\\", test, "_genes.csv", sep = ""), skip = 1))
+    expressionData[[test]] <- as.data.frame(read_csv(paste("RNA-seq data\\", test, "_genes.csv", sep = ""), skip = 1))
     
     expressionData[[test]] <- expressionData[[test]][,-c(1:2, ncol(expressionData[[test]]):(ncol(expressionData[[test]])-3))]
     
@@ -59,12 +59,7 @@ RNA_seqAnalysis <- function(dataToUse, exLevel, analysis) {
       
       dataToUse[[paste(test, "_", level, sep = "")]] <- cbind(dataToUse[[paste(test, "_", level, sep = "")]], df1[,c(2:3)])
     }   
-    if (analysis == "sampleGenes") {
-      write.csv(meanExpressionData, file = paste("Data\\RNA-seq data\\", "R-gene expression data.csv", sep = ""))
-    }
-    else if (analysis == "allClusterGenes") {
-      write.csv(meanExpressionData, file = paste("Data\\RNA-seq data\\", "All cluster genes expression data.csv", sep = ""))
-    }
+    write.csv(meanExpressionData, file = "RNA-seq expression data.csv")
   }
   return(dataToUse)
 }

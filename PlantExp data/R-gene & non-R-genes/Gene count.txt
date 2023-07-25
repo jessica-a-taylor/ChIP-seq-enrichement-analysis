@@ -1,5 +1,0 @@
-"","GeneSet","GeneCount"
-"1","allClusterGenes_High Expression",6
-"2","allClusterGenes_Intermediate Expression",12
-"3","allClusterGenes_Low Expression",152
-"4","allClusterGenes_No Expression",114
