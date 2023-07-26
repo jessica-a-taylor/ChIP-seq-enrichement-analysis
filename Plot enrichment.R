@@ -98,6 +98,11 @@ for (mod in unique(allGenes$`Mod.TF`)) {
   plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "Gene set",
                 font.ytickslab = 12)
   
-  ggsave(paste("Graphs\\Enrichment\\", analysis, "\\", mod, "_Controls vs R-genes.png", sep = ""), plot = plot, width = 10, height = 4)  
+  if (normalised == FALSE) {
+    ggsave(paste("Graphs\\Enrichment\\", analysis, "\\Non-normalised\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+  } else if (normalised == TRUE) {
+    ggsave(paste("Graphs\\Enrichment\\", analysis, "\\Normalised\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+  }
+  
 }
 

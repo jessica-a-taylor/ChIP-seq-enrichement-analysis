@@ -116,14 +116,16 @@ for (mod in unique(ChIP_experiments$`Modification/TF`)) {
 
 # Perform enrichment analysis.
 for (analysis in c("PlantExp data", "RNA-seq data")) {
+  normalised <- FALSE
   jobRunScript("Script for analysis.R", name = analysis, importEnv = TRUE)
 }
 
-# Plot the enrichment of R-genes and controls, both with and without accounting for expression level.
 for (analysis in c("PlantExp data", "RNA-seq data")) {
+  normalised <- FALSE
   jobRunScript("Plot enrichment.R", name = analysis,  importEnv = TRUE)
 }
 
+jobRunScript("Compare average gene size.R", importEnv = TRUE)
 
 # Enrichment analysis based on normalised read counts.
 # Perform enrichment analysis.

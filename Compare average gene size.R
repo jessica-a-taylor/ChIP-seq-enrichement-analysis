@@ -1,0 +1,229 @@
+library(ggplot2)
+library(data.table)
+library(grid)
+library(readr)
+library(ggpubr)
+library(rstatix)
+library(tidyverse)
+library(rstudioapi)
+
+analysis <- "PlantExp data"
+
+geneSets <- names(sampleGenes)
+
+geneWidth <- data.frame()
+
+for (set in geneSets) {
+  geneWidth <- rbind(geneWidth, data.frame(Gene = sampleGenes[[set]]$Gene,
+                                           GeneSet = rep(set, times = nrow(sampleGenes[[set]])),
+                                           GeneWidth = sampleGenes[[set]]$width))
+  
+}
+
+geneWidth$GeneWidth <- geneWidth$GeneWidth/1000
+geneWidth[which(geneWidth$GeneSet=="NLRs"),"GeneSet"] <- rep("R-genes", times = nrow(geneWidth[which(geneWidth$GeneSet=="NLRs"),]))
+
+plot <- ggplot(geneWidth, aes(x = factor(GeneSet, levels = c("control1", "control2", "control3", "control4", "control5", 
+                                                                 "control6", "control7", "control8", "control9", "control10", "R-genes")), 
+                                  y = GeneWidth)) +
+  geom_boxplot() + labs(x = "Gene set", y = "Gene width (kb)") +
+  stat_compare_means(label = "p.signif", method = "t.test",
+                     ref.group = "R-genes") +
+  theme_bw()
+  
+ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
+
+
+
+allResultsProportions <- data.frame(read_csv(paste(analysis, "\\allResultsProportions.csv", sep = "")))
+
+axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20%",
+              "40%", "60%", "80%", "100%", "TTS", "Downstream \n(200bp)", "Intergenic")
+
+# Repeat the enrichment analysis on the R-genes with widths <= the average width of the control genes (~2.5 kb).
+small_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth <= 2.5),"Gene"]
+small_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth <= 2.5),"Gene"]
+
+
+allGenes <- allResultsProportions[which(allResultsProportions$Expression == "No Expression" |
+                                        allResultsProportions$Expression == "Low Expression"),]
+ 
+controlGenes <- allGenes[grepl("control", allGenes$dataToAnalyse),]
+controlGenes <- controlGenes[which(controlGenes$Gene %in% small_ControlGenes),]
+controlGenes$dataToAnalyse <- rep("Control gene", times = nrow(controlGenes))
+  
+Rgenes <- allGenes[grepl("NLR", allGenes$dataToAnalyse),]
+Rgenes <- Rgenes[which(Rgenes$Gene %in% small_Rgenes),]
+Rgenes$dataToAnalyse <- rep("R-gene", times = nrow(Rgenes))
+  
+allGenes <- controlGenes
+allGenes <- rbind(allGenes, Rgenes)
+  
+ExpressionGenes <- data.frame()
+  
+for (level in unique(allGenes$Expression)) {
+  controlGenes1 <- controlGenes[controlGenes$Expression == level,]
+  Rgenes1 <- Rgenes[Rgenes$Expression == level,]
+  
+    for (mod in unique(allGenes$`Mod.TF`)) {
+    
+    controlGenes2 <- controlGenes1[controlGenes1$`Mod.TF` == mod,]
+    Rgenes2 <- Rgenes1[Rgenes1$`Mod.TF` == mod,]
+    
+    for (region in unique(allGenes$Region)) {
+      controlGenes3 <- controlGenes2[controlGenes2$Region == region,]
+      Rgenes3 <- Rgenes2[Rgenes2$Region == region,]
+      
+      ExpressionGenes <- rbind(ExpressionGenes, data.frame(Region = rep(region, time = 2),
+                                                           `Mod.TF` = rep(mod, times = 2),
+                                                           Proportion = c(mean(controlGenes3$Proportion), mean(Rgenes3$Proportion)),
+                                                           axisGroup = rep(unique(controlGenes3$axisGroup), times = 2),
+                                                           Expression = rep(unique(controlGenes3$Expression), times = 2),
+                                                           dataToAnalyse = c("Control gene", "R-gene")))
+    }
+  }
+}
+ 
+ 
+ExpressionGenes$Comparison <- paste(ExpressionGenes$dataToAnalyse, ExpressionGenes$Expression, sep = " \n")
+allGenes$Comparison <- paste(allGenes$dataToAnalyse, allGenes$Expression, sep = " \n")
+  
+ExpressionGenes <- ExpressionGenes[order(factor(ExpressionGenes$Comparison, levels = c("Control gene \nNo Expression", "R-gene \nNo Expression", 
+                                                                                       "Control gene \nLow Expression", "R-gene \nLow Expression"))),]
+  
+allGenes <- allGenes[order(factor(allGenes$Comparison, levels = c("Control gene \nNo Expression", "R-gene \nNo Expression", 
+                                                                  "Control gene \nLow Expression", "R-gene \nLow Expression"))),]
+  
+  
+my_comparisons <- list(c("Control gene \nNo Expression", "R-gene \nNo Expression"), 
+                       c("Control gene \nLow Expression", "R-gene \nLow Expression"), 
+                       c("R-gene \nNo Expression", "R-gene \nLow Expression"))
+  
+for (mod in unique(allGenes$Mod.TF)) {
+  df <- ExpressionGenes[ExpressionGenes$`Mod.TF`==mod,]
+  
+  comparison_df <- allGenes[allGenes$`Mod.TF`==mod,]
+  
+  stat.test <- comparison_df %>% group_by(axisGroup) %>% 
+    t_test(Proportion ~ Comparison, comparisons = my_comparisons) %>% 
+    mutate(y.position = rep(c(0.9, 0.9, 0.97), times = 10))
+  
+  plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average proportion of gene region",
+                    color = "black", fill = "Comparison", 
+                    palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), title = mod) + 
+    stat_pvalue_manual(
+      stat.test, 
+      label = "p.adj.signif", size = 4,
+      tip.length = 0.01, hide.ns = FALSE) +
+    coord_cartesian(ylim= c(0,1), clip = "off") +
+    theme_bw() +
+    
+    font("title", size = 16) +
+    font("ylab", size = 14) +
+    font("legend.title", size = 14) +
+    font("legend.text", size = 12) +
+    font("caption", size = 12) 
+  
+  plot <- facet(plot, facet.by = "axisGroup", nrow = 1, panel.labs.font = list(size = 10),
+                panel.labs = list(axisGroup = c("Intergenic","Promotor \n(1kb)","Promotor \n(500bp)", "20%",            
+                                                "40%","60%","80%","100%","Downstream \n(200bp)","Intergenic")))
+  
+  plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "Gene set",
+                font.ytickslab = 12)
+  
+  ggsave(paste("Graphs\\Enrichment\\", analysis, "\\", mod, "-small-genes.png", sep = ""), plot = plot, width = 10, height = 4)  
+} 
+
+
+# Repeat the enrichment analysis on the R-genes with widths >= the average width of the control genes (~2.5 kb).
+big_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth > 2.5),"Gene"]
+big_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth > 2.5),"Gene"]
+  
+allGenes <- allResultsProportions[which(allResultsProportions$Expression == "No Expression" |
+                                        allResultsProportions$Expression == "Low Expression"),]
+
+controlGenes <- allGenes[grepl("control", allGenes$dataToAnalyse),]
+controlGenes <- controlGenes[which(controlGenes$Gene %in% big_ControlGenes),]
+controlGenes$dataToAnalyse <- rep("Control gene", times = nrow(controlGenes))
+
+Rgenes <- allGenes[grepl("NLR", allGenes$dataToAnalyse),]
+Rgenes <- Rgenes[which(Rgenes$Gene %in% big_Rgenes),]
+Rgenes$dataToAnalyse <- rep("R-gene", times = nrow(Rgenes))
+
+allGenes <- controlGenes
+allGenes <- rbind(allGenes, Rgenes)
+
+ExpressionGenes <- data.frame()
+
+for (level in unique(allGenes$Expression)) {
+  controlGenes1 <- controlGenes[controlGenes$Expression == level,]
+  Rgenes1 <- Rgenes[Rgenes$Expression == level,]
+  
+  for (mod in unique(allGenes$`Mod.TF`)) {
+    
+    controlGenes2 <- controlGenes1[controlGenes1$`Mod.TF` == mod,]
+    Rgenes2 <- Rgenes1[Rgenes1$`Mod.TF` == mod,]
+    
+    for (region in unique(allGenes$Region)) {
+      controlGenes3 <- controlGenes2[controlGenes2$Region == region,]
+      Rgenes3 <- Rgenes2[Rgenes2$Region == region,]
+      
+      ExpressionGenes <- rbind(ExpressionGenes, data.frame(Region = rep(region, time = 2),
+                                                             `Mod.TF` = rep(mod, times = 2),
+                                                             Proportion = c(mean(controlGenes3$Proportion), mean(Rgenes3$Proportion)),
+                                                             axisGroup = rep(unique(Rgenes3$axisGroup), times = 2),
+                                                             Expression = rep(unique(Rgenes3$Expression), times = 2),
+                                                             dataToAnalyse = c("Control gene", "R-gene"))) 
+    }
+  }
+}
+
+
+ExpressionGenes$Comparison <- paste(ExpressionGenes$dataToAnalyse, ExpressionGenes$Expression, sep = " \n")
+allGenes$Comparison <- paste(allGenes$dataToAnalyse, allGenes$Expression, sep = " \n")
+
+ExpressionGenes <- ExpressionGenes[order(factor(ExpressionGenes$Comparison, levels = c("Control gene \nNo Expression", "R-gene \nNo Expression", 
+                                                                                       "Control gene \nLow Expression", "R-gene \nLow Expression"))),]
+
+allGenes <- allGenes[order(factor(allGenes$Comparison, levels = c("Control gene \nNo Expression", "R-gene \nNo Expression", 
+                                                                  "Control gene \nLow Expression", "R-gene \nLow Expression"))),]
+
+
+my_comparisons <- list(c("Control gene \nNo Expression", "R-gene \nNo Expression"), 
+                       c("Control gene \nLow Expression", "R-gene \nLow Expression"), 
+                       c("R-gene \nNo Expression", "R-gene \nLow Expression"))
+
+for (mod in unique(allGenes$Mod.TF)) {
+  df <- ExpressionGenes[ExpressionGenes$`Mod.TF`==mod,]
+  
+  comparison_df <- allGenes[allGenes$`Mod.TF`==mod,]
+  
+  stat.test <- comparison_df %>% group_by(axisGroup) %>% 
+    t_test(Proportion ~ Comparison, comparisons = my_comparisons) %>% 
+    mutate(y.position = rep(c(0.9, 0.9, 0.97), times = 10))
+  
+  plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average proportion of gene region",
+                    color = "black", fill = "Comparison", 
+                    palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), title = mod) + 
+    stat_pvalue_manual(
+      stat.test, 
+      label = "p.adj.signif", size = 4,
+      tip.length = 0.01, hide.ns = FALSE) +
+    coord_cartesian(ylim= c(0,1), clip = "off") +
+    theme_bw() +
+    
+    font("title", size = 16) +
+    font("ylab", size = 14) +
+    font("legend.title", size = 14) +
+    font("legend.text", size = 12) +
+    font("caption", size = 12) 
+  
+  plot <- facet(plot, facet.by = "axisGroup", nrow = 1, panel.labs.font = list(size = 10),
+                panel.labs = list(axisGroup = c("Intergenic","Promotor \n(1kb)","Promotor \n(500bp)", "20%",            
+                                                "40%","60%","80%","100%","Downstream \n(200bp)","Intergenic")))
+  
+  plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "Gene set",
+                font.ytickslab = 12)
+  
+  ggsave(paste("Graphs\\Enrichment\\", analysis, "\\", mod, "-big-genes.png", sep = ""), plot = plot, width = 10, height = 4)  
+} 

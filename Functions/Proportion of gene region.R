@@ -28,10 +28,19 @@ proportionsFunction <- function (geneRegions, allOverlaps, data) {
               peakOverlaps <- append(peakOverlaps, newOverlapsFunction(as.numeric(allOverlaps[[n]][[mod]][row, "start"]), as.numeric(allOverlaps[[n]][[mod]][row, "end"]),
                                                                      as.numeric(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$start), as.numeric(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$end)))
             }
-            proportionDF <- rbind(proportionDF, data.frame(Gene = n,
-                                                           Region = r,
-                                                           `Mod/TF` = mod,
-                                                           Proportion = sum(peakOverlaps)/(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$width)*((geneRegions[[r]][geneRegions[[r]]$Gene==n,]$width)/mean(geneRegions[[r]]$width))))
+            if (normalised == FALSE) {
+              proportionDF <- rbind(proportionDF, data.frame(Gene = n,
+                                                             Region = r,
+                                                             `Mod/TF` = mod,
+                                                             Proportion = sum(peakOverlaps)/(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$width)))
+            }
+            else if (normalised == TRUE) {
+              proportionDF <- rbind(proportionDF, data.frame(Gene = n,
+                                                             Region = r,
+                                                             `Mod/TF` = mod,
+                                                             Proportion = sum(peakOverlaps)/(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$width)*((geneRegions[[r]][geneRegions[[r]]$Gene==n,]$width)/mean(geneRegions[[r]]$width))))
+            }
+            
           }
           else proportionDF <- rbind(proportionDF, data.frame(Gene = n,
                                                               Region = r,
