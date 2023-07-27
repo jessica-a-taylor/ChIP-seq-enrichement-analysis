@@ -143,3 +143,5 @@ for (normalised in c(TRUE, FALSE)) {
     write.csv(allResultsProportions, paste(analysis, "\\Normalised\\allResultsProportions.csv", sep = "")) 
   }
 }
+
+analysisComplete <- TRUE
