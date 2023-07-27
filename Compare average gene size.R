@@ -8,6 +8,7 @@ library(tidyverse)
 library(rstudioapi)
 
 analysis <- "PlantExp data"
+normalised <- FALSE
 
 geneSets <- names(sampleGenes)
 
@@ -35,7 +36,7 @@ ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)
 
 
 
-allResultsProportions <- data.frame(read_csv(paste(analysis, "\\allResultsProportions.csv", sep = "")))
+allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Non-normalised\\allResultsProportions.csv", sep = "")))
 
 axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20%",
               "40%", "60%", "80%", "100%", "TTS", "Downstream \n(200bp)", "Intergenic")
@@ -46,7 +47,7 @@ small_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE 
 
 
 allGenes <- allResultsProportions[which(allResultsProportions$Expression == "No Expression" |
-                                        allResultsProportions$Expression == "Low Expression"),]
+                                          allResultsProportions$Expression == "Low Expression"),]
  
 controlGenes <- allGenes[grepl("control", allGenes$dataToAnalyse),]
 controlGenes <- controlGenes[which(controlGenes$Gene %in% small_ControlGenes),]
@@ -140,7 +141,7 @@ big_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE & geneWi
 big_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth > 2.5),"Gene"]
   
 allGenes <- allResultsProportions[which(allResultsProportions$Expression == "No Expression" |
-                                        allResultsProportions$Expression == "Low Expression"),]
+                                          allResultsProportions$Expression == "Low Expression"),]
 
 controlGenes <- allGenes[grepl("control", allGenes$dataToAnalyse),]
 controlGenes <- controlGenes[which(controlGenes$Gene %in% big_ControlGenes),]

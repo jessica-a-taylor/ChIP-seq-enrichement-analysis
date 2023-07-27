@@ -116,12 +116,10 @@ for (mod in unique(ChIP_experiments$`Modification/TF`)) {
 
 # Perform enrichment analysis.
 for (analysis in c("PlantExp data", "RNA-seq data")) {
-  normalised <- FALSE
   jobRunScript("Script for analysis.R", name = analysis, importEnv = TRUE)
 }
 
 for (analysis in c("PlantExp data", "RNA-seq data")) {
-  normalised <- FALSE
   jobRunScript("Plot enrichment.R", name = analysis,  importEnv = TRUE)
 }
 
