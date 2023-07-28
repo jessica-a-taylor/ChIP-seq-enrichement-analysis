@@ -12,10 +12,14 @@ axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20
 
 for (normalised in c(TRUE, FALSE)) {
   if (normalised == FALSE) {
+    allResultsFrequencies <- data.frame(read_csv(paste(analysis, "\\Non-normalised\\allResultsFrequencies.csv", sep = "")))
     allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Non-normalised\\allResultsProportions.csv", sep = "")))
   } else if (normalised == TRUE) {
+    allResultsFrequencies <- data.frame(read_csv(paste(analysis, "\\Normalised\\allResultsFrequencies.csv", sep = "")))
     allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Normalised\\allResultsProportions.csv", sep = "")))
   }
+  
+  allResultsFrequencies <- allResultsFrequencies[-c(which(allResultsFrequencies$Expression %in% c("Intermediate Expression", "High Expression"))),]
   
   # Plot bar graph.
   ExpressionGenes <- data.frame()
@@ -88,6 +92,8 @@ for (normalised in c(TRUE, FALSE)) {
         tip.length = 0.01, hide.ns = FALSE) +
       coord_cartesian(ylim= c(0,1), clip = "off") +
       theme_bw() +
+      
+      geom_text(data = ) +
       
       font("title", size = 16) +
       font("ylab", size = 14) +

@@ -54,10 +54,7 @@ proportionsFunction <- function (geneRegions, allOverlaps, data) {
   }
   
   # Collect all hashes into a single dataframe.
-  DF <- data.frame(Gene = character(),
-                   Region = character(),
-                   Feature = character(),
-                   Measure = numeric())
+  DF <- data.frame()
   
   for (r in names(geneRegions)) {
     DF <- rbind(DF, proportionPerRegion[[r]])
