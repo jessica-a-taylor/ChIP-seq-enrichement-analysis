@@ -80,10 +80,10 @@ geneRegionAxisLocations <- function(dataToUse, geneRegions) {
 }
 
 
-# Function to add a column for modression level.
-modressionColumn <- function(dataToUse, test) {
+# Function to add a column for Expression level.
+ExpressionColumn <- function(dataToUse, test) {
   if (nrow(dataToUse) >= 1) {
-    dataToUse <- cbind(dataToUse, data.frame(modression = rep(unlist(str_split(test, "_"))[2], times = nrow(dataToUse))))
+    dataToUse <- cbind(dataToUse, data.frame(Expression = rep(unlist(str_split(test, "_"))[2], times = nrow(dataToUse))))
   }
   else dataToUse <- dataToUse
   return(dataToUse)

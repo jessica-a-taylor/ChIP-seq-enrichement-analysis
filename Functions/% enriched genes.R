@@ -1,0 +1,83 @@
+source("Functions\\Overlaps functions.R")
+
+region = c("UpstreamIntergenic", "Promotor1000", "Promotor500",
+           "Gene20", "Gene40", "Gene60", "Gene80", "Gene100", 
+           "Downstream", "DownstreamIntergenic")
+
+# Determine the proportion of each gene region overlapping with a significant peak.
+frequenciesFunction <- function (geneRegions, allOverlaps, data) {
+
+  frequencyPerRegion <- hash()
+  
+  for (r in names(geneRegions)) {
+    frequencyDF <- data.frame(Region= character(), 
+                               `Mod.TF` = character(),
+                               Frequency = numeric())
+    
+    if (length(names(allOverlaps)) >= 1) {
+      for (mod in unique(data[, "Mod.TF"])) {
+        geneList <- c()
+        
+        for (n in names(allOverlaps)) {
+          
+          modPresent <- FALSE
+          
+          if (nrow(allOverlaps[[n]][[mod]]) >= 1 & n %in% geneRegions[[r]]$Gene == TRUE) {
+            
+            for (row in 1:nrow(allOverlaps[[n]][[mod]])) {
+              if (overlapsFunction(as.numeric(allOverlaps[[n]][[mod]][row, "start"]), as.numeric(allOverlaps[[n]][[mod]][row, "end"]),
+                                   as.numeric(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$start), as.numeric(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$end))==TRUE) {
+                modPresent <- TRUE
+              }
+              else modPresent <- modPresent
+            }
+            if (modPresent == TRUE) {
+              geneList <- append(geneList, n)
+            }
+            else geneList <- geneList
+          }
+        }
+        frequencyDF <- rbind(frequencyDF, data.frame(Region = r,
+                                                     Mod.TF = mod,
+                                                     Frequency = length(geneList)/length(names(allOverlaps))*100))
+      }
+    } else frequencyDF <- frequencyDF
+    
+    frequencyPerRegion[[r]] <- frequencyDF
+  }
+  
+  # Collect all hashes into a single dataframe.
+  DF <- data.frame(Region = character(),
+                   Feature = character(),
+                   Measure = numeric(),
+                   n = numeric())
+  
+  for (r in names(geneRegions)) {
+    DF <- rbind(DF, frequencyPerRegion[[r]])
+  }
+  return(DF)
+}
+
+
+# Function to add a column to the dataframe with the numbers on the x axis that will correspond with each gene region.
+geneRegionAxisLocations <- function(dataToUse, geneRegions) {
+  grouping <- c(seq(from = -60, to = -20, by = 20), seq(from = 20, to = 100, by = 20), seq(from = 140, to = 160, by = 20))
+  axisGroup <- c()
+  
+  for (c in 1:length(names(geneRegions))) {
+    axisGroup <- append(axisGroup, rep(grouping[c], times = nrow(dataToUse[dataToUse$Region == names(geneRegions)[c],])))
+  }
+  dataToUse <- cbind(dataToUse, axisGroup)
+  
+  return(dataToUse) 
+}
+
+
+# Function to add a column for Expression level.
+expressionColumn <- function(dataToUse, test) {
+  if (nrow(dataToUse) >= 1) {
+    dataToUse <- cbind(dataToUse, data.frame(Expression = rep(unlist(str_split(test, "_"))[2], times = nrow(dataToUse))))
+  }
+  else dataToUse <- dataToUse
+  return(dataToUse)
+}
