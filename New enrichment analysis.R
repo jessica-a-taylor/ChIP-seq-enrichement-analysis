@@ -94,7 +94,7 @@ nextflowOutput$seqnames <- str_match(nextflowOutput[,"seqnames"], "^Chr(.)$")[,-
 nextflowOutput$ranges <- mergeCoordinates(nextflowOutput) 
 
 # Add column containing the chromatin modification/TF investigated.
-nextflowOutput$`Mod/TF` <- rep(NA, times = nrow(nextflowOutput))
+nextflowOutput$`Mod.TF` <- rep(NA, times = nrow(nextflowOutput))
 
 for (mod in unique(ChIP_experiments$`Modification/TF`)) {
   focusModification <- ChIP_experiments[ChIP_experiments$`Modification/TF`==mod,]
@@ -110,8 +110,8 @@ for (mod in unique(ChIP_experiments$`Modification/TF`)) {
   focusExperiments <- gsub(" ", ",", focusExperiments)
   focusExperiments <- c(strsplit(focusExperiments, ",")[[1]])
   
-  # Replace 'NAs' in 'Mod/TF' column with the focus modification/TF
-  nextflowOutput[which(nextflowOutput$experiment %in% focusExperiments),"Mod/TF"] <- mod
+  # Replace 'NAs' in 'Mod.TF' column with the focus modification/TF
+  nextflowOutput[which(nextflowOutput$experiment %in% focusExperiments),"Mod.TF"] <- mod
 }
 
 # Perform enrichment analysis.

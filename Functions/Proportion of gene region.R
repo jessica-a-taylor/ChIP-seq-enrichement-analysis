@@ -12,11 +12,11 @@ proportionsFunction <- function (geneRegions, allOverlaps, data) {
   for (r in names(geneRegions)) {
     proportionDF <- data.frame(Gene = character(),
                                Region= character(), 
-                               `Mod/TF` = character(),
+                               `Mod.TF` = character(),
                                Proportion = numeric())
     
     if (length(names(allOverlaps)) >= 1) {
-      for (mod in unique(data[, "Mod/TF"])) {
+      for (mod in unique(data[, "Mod.TF"])) {
         
         for (n in names(allOverlaps)) {
           
@@ -31,20 +31,20 @@ proportionsFunction <- function (geneRegions, allOverlaps, data) {
             if (normalised == FALSE) {
               proportionDF <- rbind(proportionDF, data.frame(Gene = n,
                                                              Region = r,
-                                                             `Mod/TF` = mod,
+                                                             `Mod.TF` = mod,
                                                              Proportion = sum(peakOverlaps)/(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$width)))
             }
             else if (normalised == TRUE) {
               proportionDF <- rbind(proportionDF, data.frame(Gene = n,
                                                              Region = r,
-                                                             `Mod/TF` = mod,
+                                                             `Mod.TF` = mod,
                                                              Proportion = sum(peakOverlaps)/(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$width)*((geneRegions[[r]][geneRegions[[r]]$Gene==n,]$width)/mean(geneRegions[[r]]$width))))
             }
             
           }
           else proportionDF <- rbind(proportionDF, data.frame(Gene = n,
                                                               Region = r,
-                                                              `Mod/TF` = mod,
+                                                              `Mod.TF` = mod,
                                                               Proportion = 0))
         }
       }

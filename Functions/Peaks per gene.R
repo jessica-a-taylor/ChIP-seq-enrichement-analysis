@@ -20,7 +20,7 @@ PeaksPerGene <- function(geneSet, data) {
 }
 
 
-# Function for creating a hash containing hashes with the coordinates of significant peaks from each Mod/TF for each gene.
+# Function for creating a hash containing hashes with the coordinates of significant peaks from each Mod.TF for each gene.
 
 peakOccurrences <- function(allPeaks, data) {
 
@@ -29,8 +29,8 @@ peakOccurrences <- function(allPeaks, data) {
   for (n in names(allPeaks)) {
     peakHash <- hash()
     
-    for (mod in unique(data[, "Mod/TF"])) {
-      peakHash[[mod]] <- allPeaks[[n]][which(allPeaks[[n]][, "Mod/TF"]==mod),]
+    for (mod in unique(data[, "Mod.TF"])) {
+      peakHash[[mod]] <- allPeaks[[n]][which(allPeaks[[n]][, "Mod.TF"]==mod),]
     }
     genePeaks[[n]] <- peakHash
   }
@@ -39,7 +39,7 @@ peakOccurrences <- function(allPeaks, data) {
   source("Functions\\Get range - merge gene coordinates.R")
   
   for (n in names(genePeaks)) {
-    for (mod in unique(data[, "Mod/TF"])) {
+    for (mod in unique(data[, "Mod.TF"])) {
       
       if (nrow(genePeaks[[n]][[mod]]) >= 1) {
         geneSet <- genePeaks[[n]][[mod]]
@@ -59,11 +59,11 @@ mergeOverlappingPeaks <- function(genePeaks, data) {
   
  allOverlaps <- hash()
   
-  # For each Mod/TF...
+  # For each Mod.TF...
   for (n in names(genePeaks)) {
     peakOverlaps <- hash()
     
-    for (mod in unique(data[, "Mod/TF"])) {
+    for (mod in unique(data[, "Mod.TF"])) {
       
       # Generate overlapSets as a list of single-item sets
       # eg, [ {1}, {2}, {3}, {4}, {5}, {6} ]
@@ -106,7 +106,7 @@ mergeOverlappingPeaks <- function(genePeaks, data) {
   
   # Find the maximum range for the overlapping peaks.
   for (n in names(allOverlaps)) {
-    for (mod in unique(data[, "Mod/TF"])) {
+    for (mod in unique(data[, "Mod.TF"])) {
       if (length(allOverlaps[[n]][[mod]])>0) {
         
         for (l in 1:length(allOverlaps[[n]][[mod]])) {
@@ -127,13 +127,13 @@ mergeOverlappingPeaks <- function(genePeaks, data) {
   
   # Create dataframes with the information needed in the bed file.
   for (n in names(genePeaks)) {
-    for (mod in unique(data[, "Mod/TF"])) {
+    for (mod in unique(data[, "Mod.TF"])) {
       df <- data.frame(seqnames = numeric(),
                        start = numeric(),
                        end = numeric(),
                        width = numeric(),
                        ranges = character(),
-                       `Mod/TF` = character())
+                       `Mod.TF` = character())
       
       if (length(allOverlaps[[n]][[mod]])>0) {
         for (l in 1:length(allOverlaps[[n]][[mod]])) {
@@ -142,7 +142,7 @@ mergeOverlappingPeaks <- function(genePeaks, data) {
                                      end = str_match(allOverlaps[[n]][[mod]][[l]], "^([0-9]+)-([0-9]+)$")[,3],
                                      width = as.numeric(str_match(allOverlaps[[n]][[mod]][[l]], "^([0-9]+)-([0-9]+)$")[,3]) - as.numeric(str_match(allOverlaps[[n]][[mod]][[l]], "^([0-9]+)-([0-9]+)$")[,2]),
                                      ranges = allOverlaps[[n]][[mod]][[l]],
-                                     `Mod/TF` = mod))
+                                     `Mod.TF` = mod))
         }
       }
       allOverlaps[[n]][[mod]] <- df
