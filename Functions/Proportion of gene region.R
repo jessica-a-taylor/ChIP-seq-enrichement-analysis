@@ -59,7 +59,7 @@ proportionsFunction <- function (geneRegions, allOverlaps, data) {
                    Feature = character(),
                    Measure = numeric())
   
-  for (r in region) {
+  for (r in names(geneRegions)) {
     DF <- rbind(DF, proportionPerRegion[[r]])
   }
   return(DF)

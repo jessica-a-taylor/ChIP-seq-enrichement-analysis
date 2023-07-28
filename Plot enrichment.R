@@ -102,6 +102,7 @@ for (normalised in c(TRUE, FALSE)) {
     plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "Gene set",
                   font.ytickslab = 12)
     
+    
     if (normalised == FALSE) {
       ggsave(paste("Graphs\\Enrichment\\", analysis, "\\Non-normalised\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
     } else if (normalised == TRUE) {
