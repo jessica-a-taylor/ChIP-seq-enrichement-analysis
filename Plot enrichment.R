@@ -19,6 +19,9 @@ for (normalised in c(TRUE, FALSE)) {
     allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Normalised\\allResultsProportions.csv", sep = "")))
   }
   
+  # Replace comma in 'Comparisons' column with \n.
+  allResultsFrequencies$Comparison <- gsub(",", "\n", allResultsFrequencies$Comparison)
+  
   # Plot bar graph.
   ExpressionGenes <- data.frame()
   
@@ -74,7 +77,7 @@ for (normalised in c(TRUE, FALSE)) {
   
   for (mod in unique(allGenes$Mod.TF)) {
     df <- ExpressionGenes[ExpressionGenes$Mod.TF==mod,]
-    df2 <- geneFrequency[geneFrequency$Mod.TF==mod,]
+    df2 <- allResultsFrequencies[allResultsFrequencies$Mod.TF==mod,]
     
     comparison_df <- allGenes[allGenes$Mod.TF==mod,]
     

@@ -88,8 +88,8 @@ for (normalised in c(TRUE, FALSE)) {
   
   geneFrequency <- data.frame(Region = rep(unique(allResultsProportions$Region), times = 4*length(unique(allResultsProportions$Mod.TF))),
                               Mod.TF = rep(unique(allResultsProportions$Mod.TF), each = 4*length(unique(allResultsProportions$Region))),
-                              Comparison = rep(c("Control gene \nNo Expression", "R-gene \nNo Expression",
-                                                 "Control gene \nLow Expression","R-gene \nLow Expression"), each = length(unique(allResultsProportions$Region))),
+                              Comparison = rep(c("Control gene ,No Expression", "R-gene ,No Expression",
+                                                 "Control gene ,Low Expression","R-gene ,Low Expression"), each = length(unique(allResultsProportions$Region))),
                               Count = rep(c(0,0), times = 2*length(unique(allResultsProportions$Region))),
                               Enrichment.mean = rep(0, times = 4*length(unique(allResultsProportions$Region))),
                               Enrichment.variance = rep(0, times = 4*length(unique(allResultsProportions$Region))))
