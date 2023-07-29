@@ -18,6 +18,7 @@ source("Functions\\Coordinates per gene region.R")
 source("Functions\\Proportion of gene region.R")
 source("Functions\\Get range - merge gene coordinates.R")
 source("Functions\\Expression column.R")
+source("Functions\\AxisGroup column.R")
 
 
 if (analysis == "PlantExp data") {
@@ -61,8 +62,6 @@ for (normalised in c(TRUE, FALSE)) {
     # each gene region that will correspond with their position on the x axis.
     proportionPerRegion <- geneRegionAxisLocations(proportionPerRegion, geneRegions)
     
-    rm(geneRegions)
-    
     # Add a column to 'proportionPerRegion' with the current expression level.
     proportionPerRegion <- expressionColumn(proportionPerRegion, test)
     
@@ -87,16 +86,20 @@ for (normalised in c(TRUE, FALSE)) {
   
   source("Functions\\% enriched genes.R")
   
-  geneFrequency <- data.frame(Region = rep(unique(allResultsProportions$Region), each = 4*length(unique(allResultsProportions$Mod.TF))),
-                              Mod.TF = rep(unique(allResultsProportions$Mod.TF), each = 4, times = length(unique(allResultsProportions$Region))),
-                              Expression = rep(c("No Expression", "Low Expression"), each = 2, times = length(unique(allResultsProportions$Region))),
-                              GeneSet = rep(c("Control gene", "R-gene"), times = 2*length(unique(allResultsProportions$Region))),
+  geneFrequency <- data.frame(Region = rep(unique(allResultsProportions$Region), times = 4*length(unique(allResultsProportions$Mod.TF))),
+                              Mod.TF = rep(unique(allResultsProportions$Mod.TF), each = 4*length(unique(allResultsProportions$Region))),
+                              Comparison = rep(c("Control gene \nNo Expression", "R-gene \nNo Expression",
+                                                 "Control gene \nLow Expression","R-gene \nLow Expression"), each = length(unique(allResultsProportions$Region))),
                               Count = rep(c(0,0), times = 2*length(unique(allResultsProportions$Region))),
+                              Enrichment.mean = rep(0, times = 4*length(unique(allResultsProportions$Region))),
                               Enrichment.variance = rep(0, times = 4*length(unique(allResultsProportions$Region))))
   
-  geneFrequency <- frequenciesFunction(allResultsProportions, geneFrequency)
+  geneFrequency <- frequenciesFunction(allResultsProportions, geneFrequency, geneCount)
   
-
+  # Add a column to 'proportionPerRegion' with the numbers for each gene region that will correspond with their position on the x axis.
+  geneFrequency <- geneRegionAxisLocations(geneFrequency, geneRegions)
+  
+  
   if (normalised == FALSE) {
     write.csv(geneFrequency, paste(analysis, "\\Non-normalised\\allResultsFrequencies.csv", sep = "")) 
     write.csv(allResultsProportions, paste(analysis, "\\Non-normalised\\allResultsProportions.csv", sep = "")) 
@@ -106,5 +109,3 @@ for (normalised in c(TRUE, FALSE)) {
     write.csv(allResultsProportions, paste(analysis, "\\Normalised\\allResultsProportions.csv", sep = "")) 
   }
 }
-
-analysisComplete <- TRUE

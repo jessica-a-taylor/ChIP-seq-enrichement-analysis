@@ -19,8 +19,6 @@ for (normalised in c(TRUE, FALSE)) {
     allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Normalised\\allResultsProportions.csv", sep = "")))
   }
   
-  allResultsFrequencies <- allResultsFrequencies[-c(which(allResultsFrequencies$Expression %in% c("Intermediate Expression", "High Expression"))),]
-  
   # Plot bar graph.
   ExpressionGenes <- data.frame()
   
@@ -40,17 +38,17 @@ for (normalised in c(TRUE, FALSE)) {
     controlGenes1 <- controlGenes[controlGenes$Expression == level,]
     Rgenes1 <- Rgenes[Rgenes$Expression == level,]
     
-    for (mod in unique(allGenes$`Mod.TF`)) {
+    for (mod in unique(allGenes$Mod.TF)) {
       
-      controlGenes2 <- controlGenes1[controlGenes1$`Mod.TF` == mod,]
-      Rgenes2 <- Rgenes1[Rgenes1$`Mod.TF` == mod,]
+      controlGenes2 <- controlGenes1[controlGenes1$Mod.TF == mod,]
+      Rgenes2 <- Rgenes1[Rgenes1$Mod.TF == mod,]
       
       for (region in unique(allGenes$Region)) {
         controlGenes3 <- controlGenes2[controlGenes2$Region == region,]
         Rgenes3 <- Rgenes2[Rgenes2$Region == region,]
         
         ExpressionGenes <- rbind(ExpressionGenes, data.frame(Region = rep(region, time = 2),
-                                                             `Mod.TF` = rep(mod, times = 2),
+                                                             Mod.TF = rep(mod, times = 2),
                                                              Proportion = c(mean(controlGenes3$Proportion), mean(Rgenes3$Proportion)),
                                                              axisGroup = rep(unique(controlGenes3$axisGroup), times = 2),
                                                              Expression = rep(unique(controlGenes3$Expression), times = 2),
@@ -74,40 +72,40 @@ for (normalised in c(TRUE, FALSE)) {
                          c("Control gene \nLow Expression", "R-gene \nLow Expression"), 
                          c("R-gene \nNo Expression", "R-gene \nLow Expression"))
   
-  for (mod in unique(allGenes$`Mod.TF`)) {
-    df <- ExpressionGenes[ExpressionGenes$`Mod.TF`==mod,]
+  for (mod in unique(allGenes$Mod.TF)) {
+    df <- ExpressionGenes[ExpressionGenes$Mod.TF==mod,]
+    df2 <- geneFrequency[geneFrequency$Mod.TF==mod,]
     
-    comparison_df <- allGenes[allGenes$`Mod.TF`==mod,]
+    comparison_df <- allGenes[allGenes$Mod.TF==mod,]
     
     stat.test <- comparison_df %>% group_by(axisGroup) %>% 
       t_test(Proportion ~ Comparison, comparisons = my_comparisons) %>% 
-      mutate(y.position = rep(c(0.9, 0.9, 0.97), times = 10))
+      mutate(y.position = rep(c(0.92, 0.92, 0.98), times = 10))
     
-    plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average proportion of gene region",
+    plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average enrichment",
                       color = "black", fill = "Comparison", 
                       palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), title = mod) + 
       stat_pvalue_manual(
         stat.test, 
-        label = "p.adj.signif", size = 4,
+        label = "p.adj.signif", size = 3,
         tip.length = 0.01, hide.ns = FALSE) +
       coord_cartesian(ylim= c(0,1), clip = "off") +
       theme_bw() +
+
+      geom_text(data = df2, aes(x = Comparison, y = Enrichment.mean+0.025, label = Count), size = 2) +
       
-      geom_text(data = ) +
-      
-      font("title", size = 16) +
-      font("ylab", size = 14) +
-      font("legend.title", size = 14) +
-      font("legend.text", size = 12) +
-      font("caption", size = 12) 
+      font("title", size = 12) +
+      font("ylab", size = 10) +
+      font("legend.title", size = 10) +
+      font("legend.text", size = 8) +
+      font("caption", size = 10) 
     
-    plot <- facet(plot, facet.by = "axisGroup", nrow = 1, panel.labs.font = list(size = 10),
+    plot <- facet(plot, facet.by = "axisGroup", nrow = 1, panel.labs.font = list(size = 8),
                   panel.labs = list(axisGroup = c("Intergenic","Promotor \n(1kb)","Promotor \n(500bp)", "20%",            
                                                   "40%","60%","80%","100%","Downstream \n(200bp)","Intergenic")))
     
-    plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "Gene set",
-                  font.ytickslab = 12)
-    
+    plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
+                  font.ytickslab = 8)
     
     if (normalised == FALSE) {
       ggsave(paste("Graphs\\Enrichment\\", analysis, "\\Non-normalised\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
