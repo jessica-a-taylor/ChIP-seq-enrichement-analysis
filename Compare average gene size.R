@@ -107,9 +107,9 @@ for (mod in unique(allGenes$Mod.TF)) {
   
   stat.test <- comparison_df %>% group_by(axisGroup) %>% 
     t_test(Proportion ~ Comparison, comparisons = my_comparisons) %>% 
-    mutate(y.position = rep(c(0.9, 0.9, 0.97), times = 10))
+    mutate(y.position = rep(c(0.92, 0.92, 0.98), times = 10))
   
-  plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average proportion of gene region",
+  plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average enrichment",
                     color = "black", fill = "Comparison", 
                     palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), title = mod) + 
     stat_pvalue_manual(
@@ -129,8 +129,8 @@ for (mod in unique(allGenes$Mod.TF)) {
                 panel.labs = list(axisGroup = c("Intergenic","Promotor \n(1kb)","Promotor \n(500bp)", "20%",            
                                                 "40%","60%","80%","100%","Downstream \n(200bp)","Intergenic")))
   
-  plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "Gene set",
-                font.ytickslab = 12)
+  plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
+                font.ytickslab = 8)
   
   ggsave(paste("Graphs\\Enrichment\\", analysis, "\\", mod, "-small-genes.png", sep = ""), plot = plot, width = 10, height = 4)  
 } 
@@ -201,9 +201,9 @@ for (mod in unique(allGenes$Mod.TF)) {
   
   stat.test <- comparison_df %>% group_by(axisGroup) %>% 
     t_test(Proportion ~ Comparison, comparisons = my_comparisons) %>% 
-    mutate(y.position = rep(c(0.9, 0.9, 0.97), times = 10))
+    mutate(y.position = rep(c(0.92, 0.92, 0.98), times = 10))
   
-  plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average proportion of gene region",
+  plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average enrichment",
                     color = "black", fill = "Comparison", 
                     palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), title = mod) + 
     stat_pvalue_manual(
@@ -223,8 +223,8 @@ for (mod in unique(allGenes$Mod.TF)) {
                 panel.labs = list(axisGroup = c("Intergenic","Promotor \n(1kb)","Promotor \n(500bp)", "20%",            
                                                 "40%","60%","80%","100%","Downstream \n(200bp)","Intergenic")))
   
-  plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "Gene set",
-                font.ytickslab = 12)
+  plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
+                font.ytickslab = 8)
   
   ggsave(paste("Graphs\\Enrichment\\", analysis, "\\", mod, "-big-genes.png", sep = ""), plot = plot, width = 10, height = 4)  
 } 

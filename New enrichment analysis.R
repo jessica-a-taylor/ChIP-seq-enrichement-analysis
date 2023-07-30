@@ -116,9 +116,9 @@ for (mod in unique(ChIP_experiments$`Modification/TF`)) {
 
 # Perform enrichment analysis.
 analysis <- "PlantExp data"
-jobRunScript("Script for analysis.R", name = analysis, importEnv = TRUE)
+jobRunScript("Script for analysis.R", importEnv = TRUE)
 
-jobRunScript("Plot enrichment.R", name = analysis,  importEnv = TRUE)
+jobRunScript("Plot enrichment.R",  importEnv = TRUE)
 jobRunScript("Compare average gene size.R", importEnv = TRUE)
 
 

@@ -90,20 +90,20 @@ for (normalised in c(TRUE, FALSE)) {
                       palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), title = mod) + 
       stat_pvalue_manual(
         stat.test, 
-        label = "p.adj.signif", size = 3,
+        label = "p.adj.signif", size = 4,
         tip.length = 0.01, hide.ns = FALSE) +
       coord_cartesian(ylim= c(0,1), clip = "off") +
       theme_bw() +
 
       geom_text(data = df2, aes(x = Comparison, y = Enrichment.mean+0.025, label = Count), size = 2) +
       
-      font("title", size = 12) +
-      font("ylab", size = 10) +
-      font("legend.title", size = 10) +
-      font("legend.text", size = 8) +
-      font("caption", size = 10) 
+      font("title", size = 16) +
+      font("ylab", size = 14) +
+      font("legend.title", size = 14) +
+      font("legend.text", size = 12) +
+      font("caption", size = 12) 
     
-    plot <- facet(plot, facet.by = "axisGroup", nrow = 1, panel.labs.font = list(size = 8),
+    plot <- facet(plot, facet.by = "axisGroup", nrow = 1, panel.labs.font = list(size = 10),
                   panel.labs = list(axisGroup = c("Intergenic","Promotor \n(1kb)","Promotor \n(500bp)", "20%",            
                                                   "40%","60%","80%","100%","Downstream \n(200bp)","Intergenic")))
     
