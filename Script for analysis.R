@@ -27,9 +27,9 @@ sampleGenesPlantExpProportions <- hash()
 geneCount <- data.frame()
 
 for (normalised in c(TRUE, FALSE)) {
-  for (test in names(sampleGenesPlantExp)) {
+  for (set in names(sampleGenesPlantExp)) {
     
-    geneSet <- sampleGenesPlantExp[[test]]
+    geneSet <- sampleGenesPlantExp[[set]]
     
     # Create a hash containing the significant peaks in each gene. 
     allPeaks <- PeaksPerGene(geneSet, nextflowOutput)
@@ -42,7 +42,7 @@ for (normalised in c(TRUE, FALSE)) {
     # For each gene in the current set of genes, merge overlapping peaks.
     allOverlaps <- mergeOverlappingPeaks(genePeaks, nextflowOutput)
     
-    geneCount <- rbind(geneCount, data.frame(GeneSet = test,
+    geneCount <- rbind(geneCount, data.frame(GeneSet = set,
                                              GeneCount = length(names(allOverlaps))))
     rm(genePeaks)
     
@@ -55,22 +55,21 @@ for (normalised in c(TRUE, FALSE)) {
     # each gene region that will correspond with their position on the x axis.
     proportionPerRegion <- geneRegionAxisLocations(proportionPerRegion, geneRegions)
     
-    # Add a column to 'proportionPerRegion' with the current expression level.
-    proportionPerRegion <- expressionColumn(proportionPerRegion, test)
+    # Add a column to 'proportionPerRegion' identifying the gene set.
+    proportionPerRegion <- expressionColumn(proportionPerRegion, set)
     
     # Store final results in 'sampleGenesPlantExpProportions'.
-    sampleGenesPlantExpProportions[[test]] <- proportionPerRegion
+    sampleGenesPlantExpProportions[[set]] <- proportionPerRegion
     
-    print(test)
+    print(set)
   }
   
   # Merge all data from all sample gene sets into one big dataframe.
   allResultsProportions <- data.frame()
   
-  for (test in names(sampleGenesPlantExpProportions)) {
-    df <- sampleGenesPlantExpProportions[[test]]
-    df <- cbind(df, data.frame(sampleGenesPlantExp = rep(unlist(str_split(test, "_"))[1], times = nrow(df))))
-    
+  for (geneSet in names(sampleGenesPlantExpProportions)) {
+    df <- sampleGenesPlantExpProportions[[geneSet]]
+
     allResultsProportions <- rbind(allResultsProportions, df)
   }
   
@@ -79,13 +78,12 @@ for (normalised in c(TRUE, FALSE)) {
   
   source("Functions\\% enriched genes.R")
   
-  geneFrequency <- data.frame(Region = rep(unique(allResultsProportions$Region), times = 4*length(unique(allResultsProportions$Mod.TF))),
-                              Mod.TF = rep(unique(allResultsProportions$Mod.TF), each = 4*length(unique(allResultsProportions$Region))),
-                              Comparison = rep(c("Control gene ,No Expression", "R-gene ,No Expression",
-                                                 "Control gene ,Low Expression","R-gene ,Low Expression"), each = length(unique(allResultsProportions$Region))),
+  geneFrequency <- data.frame(Region = rep(unique(allResultsProportions$Region), times = 8*length(unique(allResultsProportions$Mod.TF))),
+                              Mod.TF = rep(unique(allResultsProportions$Mod.TF), each = 8*length(unique(allResultsProportions$Region))),
+                              GeneSet = rep(unique(allResultsProportions$GeneSet), each = length(unique(allResultsProportions$Region))),
                               Count = rep(c(0,0), times = 2*length(unique(allResultsProportions$Region))),
-                              Enrichment.mean = rep(0, times = 4*length(unique(allResultsProportions$Region))),
-                              Enrichment.variance = rep(0, times = 4*length(unique(allResultsProportions$Region))))
+                              Enrichment.mean = rep(0, times = 8*length(unique(allResultsProportions$Region))),
+                              Enrichment.variance = rep(0, times = 8*length(unique(allResultsProportions$Region))))
   
   geneFrequency <- frequenciesFunction(allResultsProportions, geneFrequency, geneCount)
   
@@ -94,11 +92,11 @@ for (normalised in c(TRUE, FALSE)) {
   
   
   if (normalised == FALSE) {
-    write.csv(geneFrequency, paste(analysis, "\\Non-normalised\\allResultsFrequencies.csv", sep = "")) 
-    write.csv(allResultsProportions, paste(analysis, "\\Non-normalised\\allResultsProportions.csv", sep = "")) 
+    write.csv(geneFrequency, paste("PlantExp data\\Non-normalised\\allResultsFrequencies.csv", sep = "")) 
+    write.csv(allResultsProportions, paste("PlantExp data\\Non-normalised\\allResultsProportions.csv", sep = "")) 
     
   } else if (normalised == TRUE) {
-    write.csv(geneFrequency, paste(analysis, "\\Normalised\\allResultsFrequencies.csv", sep = "")) 
-    write.csv(allResultsProportions, paste(analysis, "\\Normalised\\allResultsProportions.csv", sep = "")) 
+    write.csv(geneFrequency, paste("PlantExp data\\Normalised\\allResultsFrequencies.csv", sep = "")) 
+    write.csv(allResultsProportions, paste("PlantExp data\\Normalised\\allResultsProportions.csv", sep = "")) 
   }
 }

@@ -9,47 +9,23 @@ frequenciesFunction <- function (allResultsProportions, geneFrequency, geneCount
 
   for (r in unique(allResultsProportions$Region)) {
     for (mod in unique(allResultsProportions$Mod.TF)) {
-      for (level in unique(allResultsProportions$Expression)) {
+      for (set in unique(allResultsProportions$GeneSet)) {
         df <- allResultsProportions[which(allResultsProportions$Region==r &
                                             allResultsProportions$Mod.TF==mod &
-                                            allResultsProportions$Expression==level),]
+                                            allResultsProportions$GeneSet==set),]
         
-        control_df <- df[which(grepl("control", df$dataToAnalyse) == TRUE),]
-        NLR_df <- df[which(grepl("NLR", df$dataToAnalyse) == TRUE),]
 
         geneFrequency[which(geneFrequency$Region==r & 
                               geneFrequency$Mod.TF==mod & 
-                              grepl(level, geneFrequency$Comparison)==TRUE &
-                              grepl("Control", geneFrequency$Comparison)==TRUE), "Count"] <- signif((nrow(control_df[which(control_df$Proportion > 0),])/sum(geneCount[which(grepl(level, geneCount$GeneSet)==TRUE &
-                                                                                                                                                                  grepl("control", geneCount$GeneSet)==TRUE),"GeneCount"]))*100, digits = 3)
+                              geneFrequency$GeneSet==set), "Count"] <- signif((nrow(df[which(df$Proportion > 0),])/sum(geneCount[which(geneCount$GeneSet==set), "GeneCount"]))*100, digits = 2)
         
         geneFrequency[which(geneFrequency$Region==r & 
                               geneFrequency$Mod.TF==mod & 
-                              grepl(level, geneFrequency$Comparison)==TRUE &
-                              grepl("Control", geneFrequency$Comparison)==TRUE), "Enrichment.mean"] <- mean(control_df$Proportion)
+                              geneFrequency$GeneSet==set), "Enrichment.mean"] <- mean(df$Proportion)
         
         geneFrequency[which(geneFrequency$Region==r & 
                               geneFrequency$Mod.TF==mod & 
-                              grepl(level, geneFrequency$Comparison)==TRUE &
-                              grepl("Control", geneFrequency$Comparison)==TRUE), "Enrichment.variance"] <- sd(control_df$Proportion)
-        
-        
-        geneFrequency[which(geneFrequency$Region==r & 
-                              geneFrequency$Mod.TF==mod & 
-                              grepl(level, geneFrequency$Comparison)==TRUE &
-                              grepl("R-gene", geneFrequency$Comparison)==TRUE), "Count"] <- signif((nrow(NLR_df[which(NLR_df$Proportion > 0),])/sum(geneCount[which(grepl(level, geneCount$GeneSet)==TRUE &
-                                                                                                                                                                                    grepl("NLR", geneCount$GeneSet)==TRUE),"GeneCount"]))*100, digits = 3)
-        
-        geneFrequency[which(geneFrequency$Region==r & 
-                              geneFrequency$Mod.TF==mod & 
-                              grepl(level, geneFrequency$Comparison)==TRUE &
-                              grepl("R-gene", geneFrequency$Comparison)==TRUE), "Enrichment.mean"] <- mean(NLR_df$Proportion)
-        
-        geneFrequency[which(geneFrequency$Region==r & 
-                              geneFrequency$Mod.TF==mod & 
-                              grepl(level, geneFrequency$Comparison)==TRUE &
-                              grepl("R-gene", geneFrequency$Comparison)==TRUE), "Enrichment.variance"] <- sd(NLR_df$Proportion)
-        
+                              geneFrequency$GeneSet==set), "Enrichment.variance"] <- sd(df$Proportion)
       }
     }
   }

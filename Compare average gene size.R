@@ -131,6 +131,8 @@ allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Non-normalised\\
 axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20%",
               "40%", "60%", "80%", "100%", "TTS", "Downstream \n(200bp)", "Intergenic")
 
+
+
 # Enrichment analysis for small genes with widths <= the average width of the R-genes (3.868219 kb).
 small_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth <= 3.868219),"Gene"]
 small_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth <= 3.868219),"Gene"]
