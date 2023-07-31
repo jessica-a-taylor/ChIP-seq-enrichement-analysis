@@ -12,102 +12,62 @@ axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20
 
 for (normalised in c(TRUE, FALSE)) {
   if (normalised == FALSE) {
-    allResultsFrequencies <- data.frame(read_csv(paste(analysis, "\\Non-normalised\\allResultsFrequencies.csv", sep = "")))
-    allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Non-normalised\\allResultsProportions.csv", sep = "")))
+    allResultsFrequencies <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allResultsFrequencies.csv", sep = "")))
+    allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allResultsProportions.csv", sep = "")))
   } else if (normalised == TRUE) {
-    allResultsFrequencies <- data.frame(read_csv(paste(analysis, "\\Normalised\\allResultsFrequencies.csv", sep = "")))
-    allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Normalised\\allResultsProportions.csv", sep = "")))
+    allResultsFrequencies <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allResultsFrequencies.csv", sep = "")))
+    allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allResultsProportions.csv", sep = "")))
   }
   
   # Replace comma in 'Comparisons' column with \n.
-  allResultsFrequencies$Comparison <- gsub(",", "\n", allResultsFrequencies$Comparison)
+  allResultsFrequencies$GeneSet <- paste(str_match(allResultsFrequencies$GeneSet, "^([A-Za-z]+.gene).*$")[,-1], " \n", 
+                                         str_match(allResultsFrequencies$GeneSet, "^[A-Za-z]+.gene(.*)$")[,-1], sep = "")
+  
+  allResultsProportions$GeneSet <- paste(str_match(allResultsProportions$GeneSet, "^([A-Za-z]+.gene).*$")[,-1], " \n", 
+                                         str_match(allResultsProportions$GeneSet, "^[A-Za-z]+.gene(.*)$")[,-1], sep = "")
+  
+  allResultsFrequencies <- allResultsFrequencies[order(factor(allResultsFrequencies$GeneSet, 
+                                                              levels = c("Control gene \n No Expression", "R-gene \n No Expression",
+                                                                         "Control gene \n Low Expression", "R-gene \n Low Expression",
+                                                                         "Control gene \n Intermediate Expression", "R-gene \n Intermediate Expression",
+                                                                         "Control gene \n High Expression", "R-gene \n High Expression"))),]
+  
+  allResultsProportions <- allResultsProportions[order(factor(allResultsProportions$GeneSet, 
+                                                              levels = c("Control gene \n No Expression", "R-gene \n No Expression",
+                                                                         "Control gene \n Low Expression", "R-gene \n Low Expression",
+                                                                         "Control gene \n Intermediate Expression", "R-gene \n Intermediate Expression",
+                                                                         "Control gene \n High Expression", "R-gene \n High Expression"))),]
+  
+  
+  my_comparisons <- list(c("Control gene \n No Expression", "R-gene \n No Expression"), 
+                         c("Control gene \n Low Expression", "R-gene \n Low Expression"),
+                         c("Control gene \n Intermediate Expression", "R-gene \n Intermediate Expression"),
+                         c("Control gene \n High Expression", "R-gene \n High Expression"),
+                         c("R-gene \n No Expression", "R-gene \n Low Expression"), 
+                         c("R-gene \n Low Expression", "R-gene \n Intermediate Expression"),
+                         c("R-gene \n Intermediate Expression", "R-gene \n High Expression"))
   
   # Plot bar graph.
-  ExpressionGenes <- data.frame()
-  
-  allGenes <- allResultsProportions[which(allResultsProportions$Expression == "No Expression" |
-                                            allResultsProportions$Expression == "Low Expression"),]
-  
-  controlGenes <- allGenes[grepl("control", allGenes$dataToAnalyse),]
-  controlGenes$dataToAnalyse <- rep("Control gene", times = nrow(controlGenes))
-  
-  Rgenes <- allGenes[grepl("NLR", allGenes$dataToAnalyse),]
-  Rgenes$dataToAnalyse <- rep("R-gene", times = nrow(Rgenes))
-  
-  allGenes <- controlGenes
-  allGenes <- rbind(allGenes, Rgenes)
-  
-  for (level in unique(allGenes$Expression)) {
-    controlGenes1 <- controlGenes[controlGenes$Expression == level,]
-    Rgenes1 <- Rgenes[Rgenes$Expression == level,]
+  for (mod in unique(allResultsProportions$Mod.TF)) {
+    df <- allResultsFrequencies[allResultsFrequencies$Mod.TF==mod,]
     
-    for (mod in unique(allGenes$Mod.TF)) {
-      
-      controlGenes2 <- controlGenes1[controlGenes1$Mod.TF == mod,]
-      Rgenes2 <- Rgenes1[Rgenes1$Mod.TF == mod,]
-      
-      for (region in unique(allGenes$Region)) {
-        controlGenes3 <- controlGenes2[controlGenes2$Region == region,]
-        Rgenes3 <- Rgenes2[Rgenes2$Region == region,]
-        
-        ExpressionGenes <- rbind(ExpressionGenes, data.frame(Region = rep(region, time = 2),
-                                                             Mod.TF = rep(mod, times = 2),
-                                                             Proportion = c(mean(controlGenes3$Proportion), mean(Rgenes3$Proportion)),
-                                                             axisGroup = rep(unique(controlGenes3$axisGroup), times = 2),
-                                                             Expression = rep(unique(controlGenes3$Expression), times = 2),
-                                                             dataToAnalyse = c("Control gene", "R-gene")))
-      }
-    }
-  }
-  
-  
-  ExpressionGenes$Comparison <- paste(ExpressionGenes$dataToAnalyse, ExpressionGenes$Expression, sep = " \n")
-  allGenes$Comparison <- rep("comparison", times = nrow(allGenes))
-  
-  allGenes[which(grepl("control", allGenes$dataToAnalyse)==TRUE &
-                   allGenes$Expression=="No Expression"), "Comparison"] <- "Control gene \nNo Expression"
-  
-  allGenes[which(grepl("control", allGenes$dataToAnalyse)==TRUE &
-                   allGenes$Expression=="Low Expression"), "Comparison"] <- "Control gene \nLow Expression"
-  
-  allGenes[which(grepl("NLR", allGenes$dataToAnalyse)==TRUE &
-                   allGenes$Expression=="No Expression"), "Comparison"] <- "R-gene \nNo Expression"
-  
-  allGenes[which(grepl("NLR", allGenes$dataToAnalyse)==TRUE &
-                   allGenes$Expression=="Low Expression"), "Comparison"] <- "R-gene \nLow Expression"
-  
-  ExpressionGenes <- ExpressionGenes[order(factor(ExpressionGenes$Comparison, levels = c("Control gene \nNo Expression", "R-gene \nNo Expression", 
-                                                                                         "Control gene \nLow Expression", "R-gene \nLow Expression"))),]
-  
-  allGenes <- allGenes[order(factor(allGenes$Comparison, levels = c("Control gene \nNo Expression", "R-gene \nNo Expression", 
-                                                                    "Control gene \nLow Expression", "R-gene \nLow Expression"))),]
-  
-  
-  my_comparisons <- list(c("Control gene \nNo Expression", "R-gene \nNo Expression"), 
-                         c("Control gene \nLow Expression", "R-gene \nLow Expression"), 
-                         c("R-gene \nNo Expression", "R-gene \nLow Expression"))
-  
-  for (mod in unique(allGenes$Mod.TF)) {
-    df <- ExpressionGenes[ExpressionGenes$Mod.TF==mod,]
-    df2 <- allResultsFrequencies[allResultsFrequencies$Mod.TF==mod,]
-    
-    comparison_df <- allGenes[allGenes$Mod.TF==mod,]
+    comparison_df <- allResultsProportions[allResultsProportions$Mod.TF==mod,]
     
     stat.test <- comparison_df %>% group_by(axisGroup) %>% 
-      t_test(Proportion ~ Comparison, comparisons = my_comparisons) %>% 
-      mutate(y.position = rep(c(0.92, 0.92, 0.98), times = 10))
+      t_test(Proportion ~ GeneSet, comparisons = my_comparisons) %>% 
+      mutate(y.position = rep(c(0.98, 0.98, 0.98, 0.98, 1.02, 1.04, 1.06), times = 10))
     
-    plot <- ggbarplot(df, x = "Comparison", y="Proportion", ylab = "Average enrichment",
-                      color = "black", fill = "Comparison", 
-                      palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), title = mod) + 
+    plot <- ggbarplot(df, x = "GeneSet", y="Enrichment.mean", ylab = "Average enrichment",
+                      color = "black", fill = "GeneSet", 
+                      #palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), 
+                      title = mod) + theme_bw() +
       stat_pvalue_manual(
         stat.test, 
         label = "p.adj.signif", size = 4,
         tip.length = 0.01, hide.ns = FALSE) +
-      coord_cartesian(ylim= c(0,1), clip = "off") +
-      theme_bw() +
+      coord_cartesian(ylim= c(0,1.04), clip = "off") +
 
-      geom_text(data = df2, aes(x = Comparison, y = Enrichment.mean+0.025, label = Count), size = 2) +
+      geom_text(data = df, aes(x = GeneSet, y = Enrichment.mean+0.025, label = Count), size = 2) +
       
       font("title", size = 16) +
       font("ylab", size = 14) +

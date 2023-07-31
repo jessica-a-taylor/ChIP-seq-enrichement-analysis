@@ -11,7 +11,7 @@ PlantExp <- function(genomicData, NLR_genes) {
   }
 
   # Sample 1000 random genes.
-  control_genes <- genomicData[c(sample(nrow(genomicData), 1000)),]
+  control_genes <- genomicData[c(sample(nrow(genomicData), 2000)),]
     
   control_data <- expressionData[c(which(expressionData$geneId %in% control_genes$Gene)),]
   control_data <- control_data[,-c(2:4)]
@@ -44,18 +44,18 @@ PlantExp <- function(genomicData, NLR_genes) {
   expressionLevel <- c()
     
   for (row in 1:nrow(PlantExpData)) {
-    if (0 <= PlantExpData[row, "TPM"] & PlantExpData[row, "TPM"] <= 1) {
+    if (PlantExpData[row, "TPM"] <= quantile(NLR_data$TPM, probs = .5)) {
       expressionLevel <- append(expressionLevel, "No Expression")
     }
-    else if (1 < PlantExpData[row, "TPM"] & PlantExpData[row, "TPM"] <= 5) {
+    else if (quantile(NLR_data$TPM, probs = .5) < PlantExpData[row, "TPM"] & PlantExpData[row, "TPM"] <= quantile(NLR_data$TPM, probs = .8)) {
       expressionLevel <- append(expressionLevel, "Low Expression")
     }
-    else if (5 < PlantExpData[row, "TPM"] & PlantExpData[row, "TPM"] <= 10) {
-      expressionLevel <- append(expressionLevel, "Intermediate Expression")
-    }
-    else if (PlantExpData[row, "TPM"] > 10) {
+    else if (quantile(NLR_data$TPM, probs = .8) < PlantExpData[row, "TPM"] & PlantExpData[row, "TPM"] <= quantile(NLR_data$TPM, probs = .9)) {
       expressionLevel <- append(expressionLevel, "High Expression")
     }
+    #else if (PlantExpData[row, "TPM"] > 10) {
+    #  expressionLevel <- append(expressionLevel, "High Expression")
+    #}
   }
   
   PlantExpData <- cbind(PlantExpData, data.frame(ExpressionLevel = expressionLevel))
