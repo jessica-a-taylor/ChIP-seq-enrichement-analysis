@@ -62,7 +62,19 @@ for (normalised in c(TRUE, FALSE)) {
   
   
   ExpressionGenes$Comparison <- paste(ExpressionGenes$dataToAnalyse, ExpressionGenes$Expression, sep = " \n")
-  allGenes$Comparison <- paste(allGenes$dataToAnalyse, allGenes$Expression, sep = " \n")
+  allGenes$Comparison <- rep("comparison", times = nrow(allGenes))
+  
+  allGenes[which(grepl("control", allGenes$dataToAnalyse)==TRUE &
+                   allGenes$Expression=="No Expression"), "Comparison"] <- "Control gene \nNo Expression"
+  
+  allGenes[which(grepl("control", allGenes$dataToAnalyse)==TRUE &
+                   allGenes$Expression=="Low Expression"), "Comparison"] <- "Control gene \nLow Expression"
+  
+  allGenes[which(grepl("NLR", allGenes$dataToAnalyse)==TRUE &
+                   allGenes$Expression=="No Expression"), "Comparison"] <- "R-gene \nNo Expression"
+  
+  allGenes[which(grepl("NLR", allGenes$dataToAnalyse)==TRUE &
+                   allGenes$Expression=="Low Expression"), "Comparison"] <- "R-gene \nLow Expression"
   
   ExpressionGenes <- ExpressionGenes[order(factor(ExpressionGenes$Comparison, levels = c("Control gene \nNo Expression", "R-gene \nNo Expression", 
                                                                                          "Control gene \nLow Expression", "R-gene \nLow Expression"))),]

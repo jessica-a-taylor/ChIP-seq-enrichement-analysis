@@ -10,6 +10,7 @@ library(rstudioapi)
 analysis <- "PlantExp data"
 normalised <- FALSE
 
+# Compare average gene size between R-genes and control genes.
 geneSets <- names(sampleGenes)
 
 geneWidth <- data.frame()
@@ -29,21 +30,110 @@ plot <- ggplot(geneWidth, aes(x = factor(GeneSet, levels = c("control1", "contro
                                   y = GeneWidth)) +
   geom_boxplot() + labs(x = "Gene set", y = "Gene width (kb)") +
   stat_compare_means(label = "p.signif", method = "t.test",
-                     ref.group = "R-genes") +
-  theme_bw()
-  
+                     ref.group = "R-genes") + theme_bw() 
+
 ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
 
 
+# Determine whether there is still a significant difference between R-genes and control genes of each size category.
+# Very small genes
+verySmall_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE & 
+                                  geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .10)),]
+verySmall_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE &
+                                        geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .10)),]
 
+verySmall_ControlGenes <- verySmall_ControlGenes[c(sample(nrow(verySmall_ControlGenes), nrow(verySmall_Rgenes))),]
+
+
+verySmallGenes <- verySmall_Rgenes
+verySmallGenes <- rbind(verySmallGenes, data.frame(Gene = verySmall_ControlGenes$Gene,
+                                           GeneSet = rep("Control genes", times = nrow(verySmall_ControlGenes)),
+                                           GeneWidth= verySmall_ControlGenes$GeneWidth))
+
+plot <- ggplot(verySmallGenes, aes(x = GeneSet, y = GeneWidth)) +
+  geom_boxplot() + labs(x = paste("Gene set (n = ", nrow(verySmall_Rgenes), ")", sep = ""), y = "Gene width (kb)") +
+  stat_compare_means(label = "p.signif", method = "t.test",
+                     ref.group = "R-genes") + theme_bw()
+
+ggsave("Graphs\\Very small gene width comparison.png", plot = plot, width = 8, height = 4)  
+
+
+# Small genes
+small_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE &
+                                  geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .10) &
+                                  geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .25)),]
+small_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE &
+                                        geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .10) &
+                                        geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .25)),]
+
+small_ControlGenes <- small_ControlGenes[c(sample(nrow(small_ControlGenes), nrow(small_Rgenes))),]
+
+
+smallGenes <- small_Rgenes
+smallGenes <- rbind(smallGenes, data.frame(Gene = small_ControlGenes$Gene,
+                                               GeneSet = rep("Control genes", times = nrow(small_ControlGenes)),
+                                               GeneWidth= small_ControlGenes$GeneWidth))
+
+plot <- ggplot(smallGenes, aes(x = GeneSet, y = GeneWidth)) +
+  geom_boxplot() + labs(x = paste("Gene set (n = ", nrow(small_Rgenes), ")", sep = ""), y = "Gene width (kb)") +
+  stat_compare_means(label = "p.signif", method = "t.test",
+                     ref.group = "R-genes") + theme_bw()
+
+ggsave("Graphs\\Small gene width comparison.png", plot = plot, width = 8, height = 4) 
+
+# Medium genes
+medium_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE &
+                                  geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .25) &
+                                  geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .75)),]
+medium_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE &
+                                        geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .25) &
+                                        geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .75)),]
+
+medium_ControlGenes <- medium_ControlGenes[c(sample(nrow(medium_ControlGenes), nrow(medium_Rgenes))),]
+
+
+mediumGenes <- medium_Rgenes
+mediumGenes <- rbind(mediumGenes, data.frame(Gene = medium_ControlGenes$Gene,
+                                           GeneSet = rep("Control genes", times = nrow(medium_ControlGenes)),
+                                           GeneWidth= medium_ControlGenes$GeneWidth))
+
+plot <- ggplot(mediumGenes, aes(x = GeneSet, y = GeneWidth)) +
+  geom_boxplot() + labs(x = paste("Gene set (n = ", nrow(medium_Rgenes), ")", sep = ""), y = "Gene width (kb)") +
+  stat_compare_means(label = "p.signif", method = "t.test",
+                     ref.group = "R-genes") + theme_bw()
+
+ggsave("Graphs\\Medium gene width comparison.png", plot = plot, width = 8, height = 4) 
+
+# Big genes
+big_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE &
+                                   geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .75)),]
+big_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE &
+                                         geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-genes"),"GeneWidth"], probs = .75)),]
+
+big_ControlGenes <- big_ControlGenes[c(sample(nrow(big_ControlGenes), nrow(big_Rgenes))),]
+
+
+bigGenes <- big_Rgenes
+bigGenes <- rbind(bigGenes, data.frame(Gene = big_ControlGenes$Gene,
+                                             GeneSet = rep("Control genes", times = nrow(big_ControlGenes)),
+                                             GeneWidth= big_ControlGenes$GeneWidth))
+
+plot <- ggplot(bigGenes, aes(x = GeneSet, y = GeneWidth)) +
+  geom_boxplot() + labs(x = paste("Gene set (n = ", nrow(big_Rgenes), ")", sep = ""), y = "Gene width (kb)") +
+  stat_compare_means(label = "p.signif", method = "t.test",
+                     ref.group = "R-genes") + theme_bw()
+
+ggsave("Graphs\\Big gene width comparison.png", plot = plot, width = 8, height = 4) 
+
+# Repeat the enrichment analysis for genes in each size category.
 allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Non-normalised\\allResultsProportions.csv", sep = "")))
 
 axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20%",
               "40%", "60%", "80%", "100%", "TTS", "Downstream \n(200bp)", "Intergenic")
 
-# Repeat the enrichment analysis on the R-genes with widths <= the average width of the control genes (~2.5 kb).
-small_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth <= 2.5),"Gene"]
-small_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth <= 2.5),"Gene"]
+# Enrichment analysis for small genes with widths <= the average width of the R-genes (3.868219 kb).
+small_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth <= 3.868219),"Gene"]
+small_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth <= 3.868219),"Gene"]
 
 
 allGenes <- allResultsProportions[which(allResultsProportions$Expression == "No Expression" |
@@ -136,9 +226,9 @@ for (mod in unique(allGenes$Mod.TF)) {
 } 
 
 
-# Repeat the enrichment analysis on the R-genes with widths >= the average width of the control genes (~2.5 kb).
-big_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth > 2.5),"Gene"]
-big_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth > 2.5),"Gene"]
+# Enrichment analysis for big genes with widths >= the average width of the R-genes (3.868219 kb).
+big_Rgenes <- geneWidth[which(grepl("R-genes", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth > 3.868219),"Gene"]
+big_ControlGenes <- geneWidth[which(grepl("control", geneWidth$GeneSet)==TRUE & geneWidth$GeneWidth > 3.868219),"Gene"]
   
 allGenes <- allResultsProportions[which(allResultsProportions$Expression == "No Expression" |
                                           allResultsProportions$Expression == "Low Expression"),]
