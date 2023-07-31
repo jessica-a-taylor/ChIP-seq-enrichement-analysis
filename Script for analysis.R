@@ -20,23 +20,16 @@ source("Functions\\Get range - merge gene coordinates.R")
 source("Functions\\Expression column.R")
 source("Functions\\AxisGroup column.R")
 
-
-if (analysis == "PlantExp data") {
-  dataToAnalyse <- sampleGenesPlantExp
-} else if (analysis == "RNA-seq data") {
-  dataToAnalyse <- sampleGenesRNAseq
-}
-
 # Create a hash for storing the proportion of each gene region overlapping with a significant peak.
-dataToAnalyseProportions <- hash()
+sampleGenesPlantExpProportions <- hash()
 
 # Generate a list of the number of genes in each set.
 geneCount <- data.frame()
 
 for (normalised in c(TRUE, FALSE)) {
-  for (test in names(dataToAnalyse)[grepl("_", names(dataToAnalyse))]) {
+  for (test in names(sampleGenesPlantExp)) {
     
-    geneSet <- dataToAnalyse[[test]]
+    geneSet <- sampleGenesPlantExp[[test]]
     
     # Create a hash containing the significant peaks in each gene. 
     allPeaks <- PeaksPerGene(geneSet, nextflowOutput)
@@ -65,8 +58,8 @@ for (normalised in c(TRUE, FALSE)) {
     # Add a column to 'proportionPerRegion' with the current expression level.
     proportionPerRegion <- expressionColumn(proportionPerRegion, test)
     
-    # Store final results in 'dataToAnalyseProportions'.
-    dataToAnalyseProportions[[test]] <- proportionPerRegion
+    # Store final results in 'sampleGenesPlantExpProportions'.
+    sampleGenesPlantExpProportions[[test]] <- proportionPerRegion
     
     print(test)
   }
@@ -74,9 +67,9 @@ for (normalised in c(TRUE, FALSE)) {
   # Merge all data from all sample gene sets into one big dataframe.
   allResultsProportions <- data.frame()
   
-  for (test in names(dataToAnalyseProportions)) {
-    df <- dataToAnalyseProportions[[test]]
-    df <- cbind(df, data.frame(dataToAnalyse = rep(unlist(str_split(test, "_"))[1], times = nrow(df))))
+  for (test in names(sampleGenesPlantExpProportions)) {
+    df <- sampleGenesPlantExpProportions[[test]]
+    df <- cbind(df, data.frame(sampleGenesPlantExp = rep(unlist(str_split(test, "_"))[1], times = nrow(df))))
     
     allResultsProportions <- rbind(allResultsProportions, df)
   }

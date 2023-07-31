@@ -11,7 +11,9 @@ PlantExp <- function(genomicData, NLR_genes) {
   }
 
   # Sample 1000 random genes.
-  control_data <- expressionData[c(which(expressionData$geneId %in% genomicData[c(sample(nrow(genomicData), 1000)),"Gene"])),]
+  control_genes <- genomicData[c(sample(nrow(genomicData), 1000)),]
+    
+  control_data <- expressionData[c(which(expressionData$geneId %in% control_genes$Gene)),]
   control_data <- control_data[,-c(2:4)]
   control_data <- control_data[order(control_data$geneId),]
   control_data$GeneSet <- rep("Control gene", times = nrow(control_data))
@@ -58,6 +60,20 @@ PlantExp <- function(genomicData, NLR_genes) {
   
   PlantExpData <- cbind(PlantExpData, data.frame(ExpressionLevel = expressionLevel))
   
+  # Add genomic data to the `PlantExpData` dataframe.
+  infoNeeded <- data.frame()
+  
+  for (row in 1:nrow(PlantExpData)) {
+    if (PlantExpData[row, "GeneSet"] == "Control gene") {
+      infoNeeded <- rbind(infoNeeded, data.frame(control_genes[which(control_genes$Gene == PlantExpData[row, "Gene"]),]))
+    }
+    else if (PlantExpData[row, "GeneSet"] == "R-gene") {
+      infoNeeded <- rbind(infoNeeded, data.frame(NLR_genes[which(NLR_genes$Gene == PlantExpData[row, "Gene"]),]))
+    }
+  }
+  
+  PlantExpData <- cbind(PlantExpData, infoNeeded)
+  
   # Sort control and R-genes into a hash based on expression level.
   sampleGenes <- hash()
   
@@ -69,7 +85,8 @@ PlantExp <- function(genomicData, NLR_genes) {
         sampleGenes[[paste(set, level, sep = " ")]] <- PlantExpData[which(PlantExpData$Expression == level & PlantExpData$GeneSet == set),]
       }
       else if (set == "Control gene") {
-        sampleGenes[[paste(set, level, sep = " ")]] <- PlantExpData[c(sample(nrow(PlantExpData[which(PlantExpData$Expression == level & 
+        sampleGenes[[paste(set, level, sep = " ")]] <- PlantExpData[which(PlantExpData$Expression == level & 
+                                                                            PlantExpData$GeneSet == set),][c(sample(nrow(PlantExpData[which(PlantExpData$Expression == level & 
                                                                                                   PlantExpData$GeneSet == set),]), nrow(sampleGenes[[paste("R-gene", level, sep = " ")]]))),]
       }
     }
