@@ -24,42 +24,20 @@ library(glue)
 genomicData <- as.data.frame(read_csv("Protein coding genes.csv"))
 genomicData <- genomicData[,-1]
 
-source("Functions\\Coordinates per gene region.R")
-
 # Get the coordinates for the regions of interest for each gene.
+source("Functions\\Coordinates per gene region.R")
 geneRegions <- getGeneCoordinates(genomicData)
 
-# Get coordinates for 10 sets of random genes and store in a hash.
-source("Functions\\Sample random genes.R")
-
-if (TRUE %in% grepl("control", list.files(path = paste("Data\\RNA-seq data\\"),pattern="*.txt"))) {
-  sampleGenes <- existingSets(genomicData)
-} else sampleGenes <- geneSets(genomicData)
-
-rm(geneSets, existingSets)
-
 # Import list of R-genes.
-NLRgenes <- as.data.frame(read_xlsx("Arabidopsis NLRs.xlsx", sheet = 1))
-NLRgenes <- genomicData[which(genomicData$Gene %in% NLRgenes$Gene),]
+NLR_genes <- as.data.frame(read_xlsx("Arabidopsis NLRs.xlsx", sheet = 1))
+NLR_genes <- genomicData[which(genomicData$Gene %in% NLR_genes$Gene),]
 
-# Add R-genes to sampleGenes.
-sampleGenes[["NLRs"]] <- NLRgenes
-
-# Get filtered expression data for each set of sample genes. 
-# Add dataframes to new sampleGenes hashes for gene sets with particular expression levels.
-exLevel <- c("No Expression", "Low Expression", "Intermediate Expression",
-             "High Expression")
-
+# Sample 1000 random control genes, then sort R-genes and control genes based on expression level.
+# Ensure that the number of R-genes and control genes is the same for a particular expression level.
 source("Functions\\PlantExp.R")
-sampleGenesPlantExp <- PlantExp(sampleGenes[c("control1","control10","control2","control3","control4",
-                                              "control5","control6","control7","control8","control9","NLRs")], exLevel)
+sampleGenesPlantExp <- PlantExp(genomicData, NLR_genes)
 
-source("Functions\\RNA-seq data.R")
-sampleGenesRNAseq <- RNA_seqAnalysis(sampleGenes[c("control1","control10","control2","control3","control4",
-                                                   "control5","control6","control7","control8","control9","NLRs")], exLevel)
-
-
-rm(PlantExp, RNA_seqAnalysis)
+rm(PlantExp)
 
 
 source("Functions\\Get range - merge gene coordinates.R")
