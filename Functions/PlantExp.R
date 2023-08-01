@@ -9,10 +9,15 @@ PlantExp <- function(genomicData, NLR_genes) {
   for (file in filenames) {
     expressionData <- rbind(expressionData, as.data.frame(read_tsv(paste("PlantExp data\\Control\\", file, sep = ""), show_col_types = FALSE)))
   }
+  
+  # Sample 2000 random genes with a gene length distribution equal to that of the R-genes.
+  control_genes <- data.frame()
+  for (n in seq(from = .1, to = 1, by = .1)) {
+    control_genes <- rbind(control_genes, 
+                           genomicData[c(sample(nrow(genomicData[which(genomicData$width > quantile(NLR_genes$width, probs = n-.1) &
+                                                                       genomicData$width <= quantile(NLR_genes$width, probs = n)),]), 200)),]) 
+  }
 
-  # Sample 1000 random genes.
-  control_genes <- genomicData[c(sample(nrow(genomicData), 4000)),]
-    
   control_data <- expressionData[c(which(expressionData$geneId %in% control_genes$Gene)),]
   control_data <- control_data[,-c(2:4)]
   control_data <- control_data[order(control_data$geneId),]
@@ -44,13 +49,13 @@ PlantExp <- function(genomicData, NLR_genes) {
   expressionLevel <- c()
     
   for (row in 1:nrow(PlantExpData)) {
-    if (PlantExpData[row, "TPM"] <= quantile(NLR_data$TPM, probs = .5)) {
+    if (PlantExpData[row, "TPM"] <= quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .5)) {
       expressionLevel <- append(expressionLevel, "No Expression")
     }
-    else if (quantile(NLR_data$TPM, probs = .5) < PlantExpData[row, "TPM"] & PlantExpData[row, "TPM"] <= quantile(NLR_data$TPM, probs = .8)) {
+    else if (quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .5) < PlantExpData[row, "TPM"] & PlantExpData[row, "TPM"] <= quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .8)) {
       expressionLevel <- append(expressionLevel, "Low Expression")
     }
-    else if (quantile(NLR_data$TPM, probs = .8) <= PlantExpData[row, "TPM"]) {
+    else if (quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .8) <= PlantExpData[row, "TPM"]) {
       expressionLevel <- append(expressionLevel, "High Expression")
     }
     #else if (PlantExpData[row, "TPM"] > 10) {
@@ -65,7 +70,7 @@ PlantExp <- function(genomicData, NLR_genes) {
   
   for (row in 1:nrow(PlantExpData)) {
     if (PlantExpData[row, "GeneSet"] == "Control gene") {
-      infoNeeded <- rbind(infoNeeded, data.frame(control_genes[which(control_genes$Gene == PlantExpData[row, "Gene"]),]))
+      infoNeeded <- rbind(infoNeeded, data.frame(control_genes[which(control_genes$Gene == PlantExpData[row, "Gene"]),][1,]))
     }
     else if (PlantExpData[row, "GeneSet"] == "R-gene") {
       infoNeeded <- rbind(infoNeeded, data.frame(NLR_genes[which(NLR_genes$Gene == PlantExpData[row, "Gene"]),]))
@@ -79,18 +84,8 @@ PlantExp <- function(genomicData, NLR_genes) {
   
   for (level in unique(PlantExpData$ExpressionLevel)) {
     for (set in c("R-gene", "Control gene")) {
-      
-      # Randomly sample the same number of control genes as there are R-genes with a particular expression level. 
-      if (set == "R-gene") {
-        sampleGenes[[paste(set, level, sep = " ")]] <- PlantExpData[which(PlantExpData$Expression == level & PlantExpData$GeneSet == set),]
-      }
-      else if (set == "Control gene") {
-        sampleGenes[[paste(set, level, sep = " ")]] <- PlantExpData[which(PlantExpData$Expression == level & 
-                                                                            PlantExpData$GeneSet == set),][c(sample(nrow(PlantExpData[which(PlantExpData$Expression == level & 
-                                                                                                  PlantExpData$GeneSet == set),]), nrow(sampleGenes[[paste("R-gene", level, sep = " ")]]))),]
-      }
+      sampleGenes[[paste(set, level, sep = " ")]] <- PlantExpData[which(PlantExpData$Expression == level & PlantExpData$GeneSet == set),]
     }
   }
-  
   return(sampleGenes)
 }
