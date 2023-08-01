@@ -136,7 +136,7 @@ ggsave("Graphs\\Big gene width comparison.png", plot = plot, width = 8, height =
 
 # Add gene size to 'allResultsProportions'.
 for (row in 1:nrow(bigGenes)) {
-  allResultsProportions[which(allResultsProportions$Gene == bigGenes[row,"Gene"]),"Size"] <- rep("Big", times = nrow(allResultsProportions[which(allResultsProportions$Gene == bigGenes[row,"Gene"]),]))
+  allResultsProportions[which(allResultsProportions$Gene == bigGenes[row,"Gene"]),"Size"] <- rep("Large", times = nrow(allResultsProportions[which(allResultsProportions$Gene == bigGenes[row,"Gene"]),]))
 }
 
 # Plot bargraph.

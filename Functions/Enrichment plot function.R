@@ -50,22 +50,22 @@ for (size in unique(allResultsProportions$Size)) {
       
       
       plot <- ggbarplot(mean_df, x = "GeneSet", y="Enrichment.mean", ylab = "Average enrichment",
-                        color = "black", fill = "GeneSet", 
+                        color = "black", fill = "GeneSet",
                         palette = c("azure3", "cadetblue", "bisque2", "lightsalmon2", "mistyrose2", "indianred3"), 
-                        title = mod) + theme_bw() +
+                        title = paste(mod, "-", length(unique(df2[which(grepl("R-gene", df2$GeneSet)),"Gene"]))/2)) + theme_bw() +
         
         coord_cartesian(ylim= c(0,1), clip = "off") +
         
         font("ylab", size = 14) +
-        font("legend.title", size = 14) +
-        font("legend.text", size = 12) +
+        font("legend.title", size = 12) +
+        font("legend.text", size = 10) +
         font("caption", size = 12) 
       
       plot <- facet(plot, facet.by = "axisGroup", nrow = 1, panel.labs.font = list(size = 10),
                     panel.labs = list(axisGroup = c("Intergenic","Promotor \n(1kb)","Promotor \n(500bp)", "20%",            
                                                     "40%","60%","80%","100%","Downstream \n(200bp)","Intergenic")))
       
-      plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
+      plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "none", xlab = FALSE, legend.title = "",
                     font.ytickslab = 8)
       
       if (normalised == FALSE) {

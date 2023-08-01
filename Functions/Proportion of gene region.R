@@ -5,7 +5,7 @@ region = c("UpstreamIntergenic", "Promotor1000", "Promotor500",
            "Downstream", "DownstreamIntergenic")
 
 # Determine the proportion of each gene region overlapping with a significant peak.
-proportionsFunction <- function (geneRegions, allOverlaps, data) {
+proportionsFunction <- function (geneRegions, allOverlaps, nextflowOutput) {
 
   proportionPerRegion <- hash()
   
@@ -16,7 +16,7 @@ proportionsFunction <- function (geneRegions, allOverlaps, data) {
                                Proportion = numeric())
     
     if (length(names(allOverlaps)) >= 1) {
-      for (mod in unique(data[, "Mod.TF"])) {
+      for (mod in unique(nextflowOutput[, "Mod.TF"])) {
         
         for (n in names(allOverlaps)) {
           

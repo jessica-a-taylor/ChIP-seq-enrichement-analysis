@@ -51,7 +51,7 @@ for (normalised in c(TRUE, FALSE)) {
     
     stat.test <- comparison_df %>% group_by(axisGroup) %>% 
       t_test(Proportion ~ GeneSet, comparisons = my_comparisons) %>% 
-      mutate(y.position = rep(c(0.99, 0.99, 0.99, 1.09, 1.12), times = 10))
+      mutate(y.position = rep(c(1, 1, 1, 1.12, 1.16), times = 10))
     
     plot <- ggbarplot(df, x = "GeneSet", y="Enrichment.mean", ylab = "Average enrichment",
                       color = "black", fill = "GeneSet", 

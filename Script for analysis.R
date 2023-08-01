@@ -30,6 +30,7 @@ for (normalised in c(TRUE, FALSE)) {
   for (set in names(sampleGenesPlantExp)) {
     
     geneSet <- sampleGenesPlantExp[[set]]
+    geneSet <- geneSet[order(geneSet$Gene),]
     
     # Create a hash containing the significant peaks in each gene. 
     allPeaks <- PeaksPerGene(geneSet, nextflowOutput)
