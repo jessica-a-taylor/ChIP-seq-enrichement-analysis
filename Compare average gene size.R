@@ -29,14 +29,18 @@ ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)
 
 
 # Determine whether there is still a significant difference between R-genes and control genes of each size category.
+allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allResultsProportions.csv", sep = "")))
+allResultsProportions$Size <- rep("size", times = nrow(allResultsProportions))
+
 # Very small genes
 verySmall_Rgenes <- geneWidth[which(geneWidth$GeneSet=="R-gene" & 
                                   geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-gene"),"GeneWidth"], probs = .10)),]
 verySmall_ControlGenes <- geneWidth[which(geneWidth$GeneSet=="Control gene" &
                                         geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-gene"),"GeneWidth"], probs = .10)),]
 
-verySmall_ControlGenes <- verySmall_ControlGenes[c(sample(nrow(verySmall_ControlGenes), nrow(verySmall_Rgenes))),]
-
+if (nrow(verySmall_ControlGenes) >= nrow(verySmall_Rgenes)) {
+  verySmall_ControlGenes <- verySmall_ControlGenes[c(sample(nrow(verySmall_ControlGenes), nrow(verySmall_Rgenes))),]
+} else   verySmall_ControlGenes <- verySmall_ControlGenes
 
 verySmallGenes <- verySmall_Rgenes
 verySmallGenes <- rbind(verySmallGenes, verySmall_ControlGenes)
@@ -48,6 +52,11 @@ plot <- ggplot(verySmallGenes, aes(x = GeneSet, y = GeneWidth)) +
 
 ggsave("Graphs\\Very small gene width comparison.png", plot = plot, width = 8, height = 4)  
 
+# Add gene size to 'allResultsProportions'.
+for (row in 1:nrow(verySmallGenes)) {
+  allResultsProportions[which(allResultsProportions$Gene == verySmallGenes[row,"Gene"]),"Size"] <- rep("Very small", times = nrow(allResultsProportions[which(allResultsProportions$Gene == verySmallGenes[row,"Gene"]),]))
+}
+
 
 # Small genes
 small_Rgenes <- geneWidth[which(geneWidth$GeneSet=="R-gene" &
@@ -57,8 +66,9 @@ small_ControlGenes <- geneWidth[which(geneWidth$GeneSet=="Control gene" &
                                         geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-gene"),"GeneWidth"], probs = .10) &
                                         geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-gene"),"GeneWidth"], probs = .25)),]
 
-small_ControlGenes <- small_ControlGenes[c(sample(nrow(small_ControlGenes), nrow(small_Rgenes))),]
-
+if (nrow(small_ControlGenes) >= nrow(small_Rgenes)) {
+  small_ControlGenes <- small_ControlGenes[c(sample(nrow(small_ControlGenes), nrow(small_Rgenes))),]
+} else   small_ControlGenes <- small_ControlGenes
 
 smallGenes <- small_Rgenes
 smallGenes <- rbind(smallGenes, small_ControlGenes)
@@ -70,6 +80,12 @@ plot <- ggplot(smallGenes, aes(x = GeneSet, y = GeneWidth)) +
 
 ggsave("Graphs\\Small gene width comparison.png", plot = plot, width = 8, height = 4) 
 
+# Add gene size to 'allResultsProportions'.
+for (row in 1:nrow(smallGenes)) {
+  allResultsProportions[which(allResultsProportions$Gene == smallGenes[row,"Gene"]),"Size"] <- rep("Small", times = nrow(allResultsProportions[which(allResultsProportions$Gene == smallGenes[row,"Gene"]),]))
+}
+
+
 # Medium genes
 medium_Rgenes <- geneWidth[which(geneWidth$GeneSet=="R-gene" &
                                   geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-gene"),"GeneWidth"], probs = .25) &
@@ -78,8 +94,9 @@ medium_ControlGenes <- geneWidth[which(geneWidth$GeneSet=="Control gene" &
                                         geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-gene"),"GeneWidth"], probs = .25) &
                                         geneWidth$GeneWidth <= quantile(geneWidth[which(geneWidth$GeneSet=="R-gene"),"GeneWidth"], probs = .75)),]
 
-medium_ControlGenes <- medium_ControlGenes[c(sample(nrow(medium_ControlGenes), nrow(medium_Rgenes))),]
-
+if (nrow(medium_ControlGenes) >= nrow(medium_Rgenes)) {
+  medium_ControlGenes <- medium_ControlGenes[c(sample(nrow(medium_ControlGenes), nrow(medium_Rgenes))),]
+} else   medium_ControlGenes <- medium_ControlGenes
 
 mediumGenes <- medium_Rgenes
 mediumGenes <- rbind(mediumGenes, medium_ControlGenes)
@@ -91,14 +108,21 @@ plot <- ggplot(mediumGenes, aes(x = GeneSet, y = GeneWidth)) +
 
 ggsave("Graphs\\Medium gene width comparison.png", plot = plot, width = 8, height = 4) 
 
+# Add gene size to 'allResultsProportions'.
+for (row in 1:nrow(mediumGenes)) {
+  allResultsProportions[which(allResultsProportions$Gene == mediumGenes[row,"Gene"]),"Size"] <- rep("Medium", times = nrow(allResultsProportions[which(allResultsProportions$Gene == mediumGenes[row,"Gene"]),]))
+}
+
+
 # Big genes
 big_Rgenes <- geneWidth[which(geneWidth$GeneSet=="R-gene" &
                                    geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-gene"),"GeneWidth"], probs = .75)),]
 big_ControlGenes <- geneWidth[which(geneWidth$GeneSet=="Control gene" &
                                          geneWidth$GeneWidth >= quantile(geneWidth[which(geneWidth$GeneSet=="R-gene"),"GeneWidth"], probs = .75)),]
 
-big_ControlGenes <- big_ControlGenes[c(sample(nrow(big_ControlGenes), nrow(big_Rgenes))),]
-
+if (nrow(big_ControlGenes) >= nrow(big_Rgenes)) {
+  big_ControlGenes <- big_ControlGenes[c(sample(nrow(big_ControlGenes), nrow(big_Rgenes))),]
+} else   big_ControlGenes <- big_ControlGenes
 
 bigGenes <- big_Rgenes
 bigGenes <- rbind(bigGenes, big_ControlGenes)
@@ -109,6 +133,15 @@ plot <- ggplot(bigGenes, aes(x = GeneSet, y = GeneWidth)) +
                      ref.group = "R-gene") + theme_bw()
 
 ggsave("Graphs\\Big gene width comparison.png", plot = plot, width = 8, height = 4) 
+
+# Add gene size to 'allResultsProportions'.
+for (row in 1:nrow(bigGenes)) {
+  allResultsProportions[which(allResultsProportions$Gene == bigGenes[row,"Gene"]),"Size"] <- rep("Big", times = nrow(allResultsProportions[which(allResultsProportions$Gene == bigGenes[row,"Gene"]),]))
+}
+
+# Plot bargraph.
+jobRunScript("Functions\\Enrichment plot function.R",  importEnv = TRUE)
+
 
 # Repeat the enrichment analysis for genes in each size category.
 allResultsProportions <- data.frame(read_csv(paste(analysis, "\\Non-normalised\\allResultsProportions.csv", sep = "")))

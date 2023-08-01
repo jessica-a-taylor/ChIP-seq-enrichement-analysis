@@ -67,8 +67,8 @@ for (normalised in c(TRUE, FALSE)) {
   # Merge all data from all sample gene sets into one big dataframe.
   allResultsProportions <- data.frame()
   
-  for (geneSet in names(sampleGenesPlantExpProportions)) {
-    df <- sampleGenesPlantExpProportions[[geneSet]]
+  for (set in names(sampleGenesPlantExpProportions)) {
+    df <- sampleGenesPlantExpProportions[[set]]
 
     allResultsProportions <- rbind(allResultsProportions, df)
   }
@@ -78,12 +78,12 @@ for (normalised in c(TRUE, FALSE)) {
   
   source("Functions\\% enriched genes.R")
   
-  geneFrequency <- data.frame(Region = rep(unique(allResultsProportions$Region), times = 8*length(unique(allResultsProportions$Mod.TF))),
-                              Mod.TF = rep(unique(allResultsProportions$Mod.TF), each = 8*length(unique(allResultsProportions$Region))),
+  geneFrequency <- data.frame(Region = rep(unique(allResultsProportions$Region), times = 6*length(unique(allResultsProportions$Mod.TF))),
+                              Mod.TF = rep(unique(allResultsProportions$Mod.TF), each = 6*length(unique(allResultsProportions$Region))),
                               GeneSet = rep(unique(allResultsProportions$GeneSet), each = length(unique(allResultsProportions$Region))),
                               Count = rep(c(0,0), times = 2*length(unique(allResultsProportions$Region))),
-                              Enrichment.mean = rep(0, times = 8*length(unique(allResultsProportions$Region))),
-                              Enrichment.variance = rep(0, times = 8*length(unique(allResultsProportions$Region))))
+                              Enrichment.mean = rep(0, times = 6*length(unique(allResultsProportions$Region))),
+                              Enrichment.variance = rep(0, times = 6*length(unique(allResultsProportions$Region))))
   
   geneFrequency <- frequenciesFunction(allResultsProportions, geneFrequency, geneCount)
   

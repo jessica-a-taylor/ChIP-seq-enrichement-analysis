@@ -29,23 +29,19 @@ for (normalised in c(TRUE, FALSE)) {
   allResultsFrequencies <- allResultsFrequencies[order(factor(allResultsFrequencies$GeneSet, 
                                                               levels = c("Control gene \n No Expression", "R-gene \n No Expression",
                                                                          "Control gene \n Low Expression", "R-gene \n Low Expression",
-                                                                         "Control gene \n Intermediate Expression", "R-gene \n Intermediate Expression",
                                                                          "Control gene \n High Expression", "R-gene \n High Expression"))),]
   
   allResultsProportions <- allResultsProportions[order(factor(allResultsProportions$GeneSet, 
                                                               levels = c("Control gene \n No Expression", "R-gene \n No Expression",
                                                                          "Control gene \n Low Expression", "R-gene \n Low Expression",
-                                                                         "Control gene \n Intermediate Expression", "R-gene \n Intermediate Expression",
                                                                          "Control gene \n High Expression", "R-gene \n High Expression"))),]
   
   
   my_comparisons <- list(c("Control gene \n No Expression", "R-gene \n No Expression"), 
                          c("Control gene \n Low Expression", "R-gene \n Low Expression"),
-                         c("Control gene \n Intermediate Expression", "R-gene \n Intermediate Expression"),
                          c("Control gene \n High Expression", "R-gene \n High Expression"),
                          c("R-gene \n No Expression", "R-gene \n Low Expression"), 
-                         c("R-gene \n Low Expression", "R-gene \n Intermediate Expression"),
-                         c("R-gene \n Intermediate Expression", "R-gene \n High Expression"))
+                         c("R-gene \n Low Expression", "R-gene \n High Expression"))
   
   # Plot bar graph.
   for (mod in unique(allResultsProportions$Mod.TF)) {
@@ -55,37 +51,38 @@ for (normalised in c(TRUE, FALSE)) {
     
     stat.test <- comparison_df %>% group_by(axisGroup) %>% 
       t_test(Proportion ~ GeneSet, comparisons = my_comparisons) %>% 
-      mutate(y.position = rep(c(0.98, 0.98, 0.98, 0.98, 1.02, 1.04, 1.06), times = 10))
+      mutate(y.position = rep(c(0.99, 0.99, 0.99, 1.09, 1.12), times = 10))
     
     plot <- ggbarplot(df, x = "GeneSet", y="Enrichment.mean", ylab = "Average enrichment",
                       color = "black", fill = "GeneSet", 
-                      #palette = c("azure3", "cadetblue", "bisque2", "darksalmon"), 
+                      palette = c("azure3", "cadetblue", "bisque2", "lightsalmon2", "mistyrose2", "indianred3"), 
                       title = mod) + theme_bw() +
       stat_pvalue_manual(
         stat.test, 
         label = "p.adj.signif", size = 4,
         tip.length = 0.01, hide.ns = FALSE) +
-      coord_cartesian(ylim= c(0,1.04), clip = "off") +
+      coord_cartesian(ylim= c(0,1.2), clip = "off") +
 
       geom_text(data = df, aes(x = GeneSet, y = Enrichment.mean+0.025, label = Count), size = 2) +
       
       font("title", size = 16) +
       font("ylab", size = 14) +
-      font("legend.title", size = 14) +
-      font("legend.text", size = 12) +
+      font("legend.title", size = 12) +
+      font("legend.text", size = 10) +
       font("caption", size = 12) 
     
     plot <- facet(plot, facet.by = "axisGroup", nrow = 1, panel.labs.font = list(size = 10),
                   panel.labs = list(axisGroup = c("Intergenic","Promotor \n(1kb)","Promotor \n(500bp)", "20%",            
                                                   "40%","60%","80%","100%","Downstream \n(200bp)","Intergenic")))
     
+    
     plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
                   font.ytickslab = 8)
     
     if (normalised == FALSE) {
-      ggsave(paste("Graphs\\Enrichment\\", analysis, "\\Non-normalised\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+      ggsave(paste("Graphs\\Enrichment\\PlantExp data\\Non-normalised\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
     } else if (normalised == TRUE) {
-      ggsave(paste("Graphs\\Enrichment\\", analysis, "\\Normalised\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+      ggsave(paste("Graphs\\Enrichment\\PlantExp data\\Normalised\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
     }
   }
 }
