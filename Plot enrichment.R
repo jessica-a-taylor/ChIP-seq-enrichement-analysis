@@ -10,8 +10,14 @@ library(rstudioapi)
 axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20%",
               "40%", "60%", "80%", "100%", "TTS", "Downstream \n(200bp)", "Intergenic")
 
-allResultsFrequencies <- data.frame(read_csv(paste("PlantExp data\\allResultsFrequencies.csv", sep = "")))
-allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\allResultsProportions.csv", sep = "")))
+if (normalised == TRUE) {
+  allResultsFrequencies <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allResultsFrequencies.csv", sep = "")))
+  allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allResultsProportions.csv", sep = "")))  
+} else if (normalised == FALSE) {
+  allResultsFrequencies <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allResultsFrequencies.csv", sep = "")))
+  allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allResultsProportions.csv", sep = "")))
+}
+
 
   
 # Replace comma in 'Comparisons' column with \n.
@@ -70,5 +76,9 @@ for (mod in unique(allResultsProportions$Mod.TF)) {
   plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
                 font.ytickslab = 8)
   
-  ggsave(paste("Graphs\\Enrichment\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+  if (normalised == TRUE) {
+    ggsave(paste("Graphs\\Normalised\\Enrichment\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+  } else if (normalised == FALSE) {
+    ggsave(paste("Graphs\\Non-normalised\\Enrichment\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+  }
 }

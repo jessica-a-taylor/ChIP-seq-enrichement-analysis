@@ -11,11 +11,19 @@ PlantExp <- function(genomicData, NLR_genes) {
   }
   
   # Sample 1000 random genes with a gene length distribution equal to that of the R-genes.
-  control_genes <- data.frame()
-  for (n in seq(from = .1, to = 1, by = .1)) {
-    control_genes <- rbind(control_genes, 
-                           genomicData[c(sample(nrow(genomicData[which(genomicData$width > quantile(NLR_genes$width, probs = n-.1) &
-                                                                       genomicData$width <= quantile(NLR_genes$width, probs = n)),]), 100)),]) 
+  if (normalised == TRUE) {
+    control_genes <- data.frame()
+    candidateGenes <- c()
+    for (n in seq(from = .1, to = 1, by = .1)) {
+      candidateGenes <- append(candidateGenes, sample(genomicData[which(genomicData$width > quantile(NLR_genes$width, probs = n-.1) &
+                                                                          genomicData$width <= quantile(NLR_genes$width, probs = n-.05) &
+                                                                          !(genomicData$Gene %in% candidateGenes)),"Gene"], 100))
+      
+      control_genes <- rbind(control_genes, 
+                             genomicData[which(genomicData$Gene %in% candidateGenes),]) 
+    }
+  } else if (normalised == FALSE) {
+    control_genes <- genomicData[sample(nrow(genomicData), 1000),]
   }
 
   control_data <- expressionData[c(which(expressionData$geneId %in% control_genes$Gene)),]
@@ -52,15 +60,9 @@ PlantExp <- function(genomicData, NLR_genes) {
     if (PlantExpData[row, "TPM"] <= quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .5)) {
       expressionLevel <- append(expressionLevel, "No Expression")
     }
-    #else if (quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .5) < PlantExpData[row, "TPM"] & PlantExpData[row, "TPM"] <= quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .8)) {
-    #  expressionLevel <- append(expressionLevel, "Low Expression")
-    #}
-    else if (quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .5) < PlantExpData[row, "TPM"]) {
+    else if (PlantExpData[row, "TPM"] > quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .5)) {
       expressionLevel <- append(expressionLevel, "Low Expression")
     }
-    #else if (PlantExpData[row, "TPM"] > 10) {
-    #  expressionLevel <- append(expressionLevel, "High Expression")
-    #}
   }
   
   PlantExpData <- cbind(PlantExpData, data.frame(ExpressionLevel = expressionLevel))

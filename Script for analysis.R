@@ -88,6 +88,11 @@ geneFrequency <- frequenciesFunction(allResultsProportions, geneFrequency, geneC
 # Add a column to 'proportionPerRegion' with the numbers for each gene region that will correspond with their position on the x axis.
 geneFrequency <- geneRegionAxisLocations(geneFrequency, geneRegions)
 
-write.csv(geneFrequency, paste("PlantExp data\\allResultsFrequencies.csv", sep = "")) 
-write.csv(allResultsProportions, paste("PlantExp data\\allResultsProportions.csv", sep = "")) 
+if (normalised == TRUE) {
+  write.csv(geneFrequency, paste("PlantExp data\\Normalised\\allResultsFrequencies.csv", sep = "")) 
+  write.csv(allResultsProportions, paste("PlantExp data\\Normalised\\allResultsProportions.csv", sep = "")) 
+} else if (normalised == FALSE) {
+  write.csv(geneFrequency, paste("PlantExp data\\Non-normalised\\allResultsFrequencies.csv", sep = "")) 
+  write.csv(allResultsProportions, paste("PlantExp data\\Non-normalised\\allResultsProportions.csv", sep = "")) 
+}
 
