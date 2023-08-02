@@ -57,7 +57,7 @@ for (size in unique(allResultsProportions$Size)) {
           label = "p.adj.signif", size = 4,
           tip.length = 0.01, hide.ns = FALSE) +
 
-        coord_cartesian(ylim= c(0,1), clip = "off") +
+        coord_cartesian(ylim= c(0,1.08), clip = "off") +
         
         font("ylab", size = 14) +
         font("legend.title", size = 12) +
@@ -71,7 +71,7 @@ for (size in unique(allResultsProportions$Size)) {
       plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "none", xlab = FALSE, legend.title = "",
                     font.ytickslab = 8)
       
-      ggsave(paste("Graphs\\Enrichment\\PlantExp data\\", size, "-genes ", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+      ggsave(paste("Graphs\\Enrichment\\PlantExp data\\", size, "-genes ", mod, ".png", sep = ""), plot = plot, width = 10, height = 3.5)  
     }
   } else next
 }
