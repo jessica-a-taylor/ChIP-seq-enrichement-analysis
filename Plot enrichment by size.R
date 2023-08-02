@@ -13,15 +13,12 @@ allResultsProportions$GeneSet <- paste(str_match(allResultsProportions$GeneSet, 
 
 allResultsProportions <- allResultsProportions[order(factor(allResultsProportions$GeneSet, 
                                                               levels = c("Control gene \n No Expression", "R-gene \n No Expression",
-                                                                         "Control gene \n Low Expression", "R-gene \n Low Expression",
-                                                                         "Control gene \n High Expression", "R-gene \n High Expression"))),]
+                                                                         "Control gene \n Low Expression", "R-gene \n Low Expression"))),]
   
   
 my_comparisons <- list(c("Control gene \n No Expression", "R-gene \n No Expression"), 
                        c("Control gene \n Low Expression", "R-gene \n Low Expression"),
-                       c("Control gene \n High Expression", "R-gene \n High Expression"),
-                       c("R-gene \n No Expression", "R-gene \n Low Expression"), 
-                       c("R-gene \n Low Expression", "R-gene \n High Expression"))
+                       c("R-gene \n No Expression", "R-gene \n Low Expression"))
 
 for (size in unique(allResultsProportions$Size)) {
   if (size != "size") {
@@ -47,13 +44,19 @@ for (size in unique(allResultsProportions$Size)) {
                                                axisGroup = df3$axisGroup[1]))
         }
       }
-      
+      stat.test <- df1 %>% group_by(axisGroup) %>% 
+        t_test(Proportion ~ GeneSet, comparisons = my_comparisons) %>% 
+        mutate(y.position = rep(c(0.98, 0.98, 1.06), times = 10))
       
       plot <- ggbarplot(mean_df, x = "GeneSet", y="Enrichment.mean", ylab = "Average enrichment",
                         color = "black", fill = "GeneSet",
-                        palette = c("azure3", "cadetblue", "bisque2", "lightsalmon2", "mistyrose2", "indianred3"), 
-                        title = paste(mod, "-", length(unique(df2[which(grepl("R-gene", df2$GeneSet)),"Gene"]))/2)) + theme_bw() +
-        
+                        palette = c("azure3", "cadetblue", "bisque2", "lightsalmon2"), 
+                        title = paste(mod, "-", length(unique(df2[which(grepl("R-gene", df2$GeneSet)),"Gene"])))) + theme_bw() +
+        stat_pvalue_manual(
+          stat.test, 
+          label = "p.adj.signif", size = 4,
+          tip.length = 0.01, hide.ns = FALSE) +
+
         coord_cartesian(ylim= c(0,1), clip = "off") +
         
         font("ylab", size = 14) +
@@ -68,11 +71,7 @@ for (size in unique(allResultsProportions$Size)) {
       plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "none", xlab = FALSE, legend.title = "",
                     font.ytickslab = 8)
       
-      if (normalised == FALSE) {
-        ggsave(paste("Graphs\\Enrichment\\PlantExp data\\Non-normalised\\", size, "-genes", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
-      } else if (normalised == TRUE) {
-        ggsave(paste("Graphs\\Enrichment\\PlantExp data\\Normalised\\", size, "-genes", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
-      }
+      ggsave(paste("Graphs\\Enrichment\\PlantExp data\\", size, "-genes ", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
     }
   } else next
 }

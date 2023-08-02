@@ -24,10 +24,6 @@ library(glue)
 genomicData <- as.data.frame(read_csv("Protein coding genes.csv"))
 genomicData <- genomicData[,-1]
 
-# Get the coordinates for the regions of interest for each gene.
-source("Functions\\Coordinates per gene region.R")
-geneRegions <- getGeneCoordinates(genomicData)
-
 # Import list of R-genes.
 NLR_genes <- as.data.frame(read_xlsx("Arabidopsis NLRs.xlsx", sheet = 1))
 NLR_genes <- genomicData[which(genomicData$Gene %in% NLR_genes$Gene),]
@@ -37,20 +33,16 @@ NLR_genes <- genomicData[which(genomicData$Gene %in% NLR_genes$Gene),]
 source("Functions\\PlantExp.R")
 sampleGenesPlantExp <- PlantExp(genomicData, NLR_genes)
 
-rm(PlantExp)
+rm(PlantExp, genomicData, NLR_genes)
 
 
+# Enrichment analysis based on the occurrence of significant peaks.
 source("Functions\\Get range - merge gene coordinates.R")
 source("Functions\\Expression column.R")
 source("Functions\\Regions column.R")
 
 ChIP_experiments <- as.data.frame(read_csv("Nextflow_backup/ChIP experiment SRA data.csv"))
 
-axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20%",
-              "40%", "60%", "80%", "100%", "TTS", "Downstream \n(200bp)", "Intergenic")
-
-
-# Enrichment analysis based on the occurrence of significant peaks.
 # Combine nextflow pipeline outputs into a single dataframe.
 nextflowOutput <- data.frame()
 
@@ -92,12 +84,12 @@ for (mod in unique(ChIP_experiments$`Modification/TF`)) {
   nextflowOutput[which(nextflowOutput$experiment %in% focusExperiments),"Mod.TF"] <- mod
 }
 
+rm(focusModification, data, file, mod, n, row)
+
 # Perform enrichment analysis.
 jobRunScript("Script for analysis.R", importEnv = TRUE)
 
 jobRunScript("Plot enrichment.R",  importEnv = TRUE)
-jobRunScript("Compare average gene size.R", importEnv = TRUE)
-
 
 
 # Enrichment analysis based on normalised read counts.
