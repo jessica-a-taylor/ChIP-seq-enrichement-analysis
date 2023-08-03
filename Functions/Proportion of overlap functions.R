@@ -1,11 +1,33 @@
 source("Functions\\Overlaps functions.R")
 
-region = c("UpstreamIntergenic", "Promotor1000", "Promotor500",
-           "Gene20", "Gene40", "Gene60", "Gene80", "Gene100", 
-           "Downstream", "DownstreamIntergenic")
+# Determine the proportion of each gene overlapping with a significant peak.
+proportionPerGeneFunction <- function (allOverlaps, nextflowOutput, genomicData, proportionPerGene, set) {
+  
+  proportionDF <- data.frame(Gene = character(),
+                             `Mod.TF` = character(),
+                             Proportion = numeric())
+  
+  for (n in names(allOverlaps)) {
+    for (mod in unique(nextflowOutput[, "Mod.TF"])) {
+      if (genomicData[genomicData$Gene==n,"width"] >= sum(allOverlaps[[n]][[mod]]$width)) {
+        proportionDF <- rbind(proportionDF, data.frame(Gene = n,
+                                                       `Mod.TF` = mod,
+                                                       Proportion = sum(allOverlaps[[n]][[mod]]$width)/(genomicData[genomicData$Gene==n,"width"]))) 
+        
+      } else if (genomicData[genomicData$Gene==n,"width"] < sum(allOverlaps[[n]][[mod]]$width)) {
+        proportionDF <- rbind(proportionDF, data.frame(Gene = n,
+                                                       `Mod.TF` = mod,
+                                                       Proportion = 1))
+      }
+    }
+  } 
+  proportionPerGene[[set]] <- proportionDF
+  return(proportionPerGene)
+}
+
 
 # Determine the proportion of each gene region overlapping with a significant peak.
-proportionsFunction <- function (geneRegions, allOverlaps, nextflowOutput) {
+proportionPerRegionFunction <- function (geneRegions, allOverlaps, nextflowOutput) {
 
   proportionPerRegion <- hash()
   

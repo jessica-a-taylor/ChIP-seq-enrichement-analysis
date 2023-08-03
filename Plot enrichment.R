@@ -11,27 +11,27 @@ axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20
               "40%", "60%", "80%", "100%", "TTS", "Downstream \n(200bp)", "Intergenic")
 
 if (normalised == TRUE) {
-  allResultsFrequencies <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allResultsFrequencies.csv", sep = "")))
-  allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allResultsProportions.csv", sep = "")))  
+  allFrequencies <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allFrequencies.csv", sep = "")))
+  allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allProportionsPerRegion.csv", sep = "")))  
 } else if (normalised == FALSE) {
-  allResultsFrequencies <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allResultsFrequencies.csv", sep = "")))
-  allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allResultsProportions.csv", sep = "")))
+  allFrequencies <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allFrequencies.csv", sep = "")))
+  allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allProportionsPerRegion.csv", sep = "")))
 }
 
 
   
 # Replace comma in 'Comparisons' column with \n.
-allResultsFrequencies$GeneSet <- paste(str_match(allResultsFrequencies$GeneSet, "^([A-Za-z]+.gene).*$")[,-1], " \n", 
-                                       str_match(allResultsFrequencies$GeneSet, "^[A-Za-z]+.gene(.*)$")[,-1], sep = "")
+allFrequencies$GeneSet <- paste(str_match(allFrequencies$GeneSet, "^([A-Za-z]+.gene).*$")[,-1], " \n", 
+                                       str_match(allFrequencies$GeneSet, "^[A-Za-z]+.gene(.*)$")[,-1], sep = "")
 
-allResultsProportions$GeneSet <- paste(str_match(allResultsProportions$GeneSet, "^([A-Za-z]+.gene).*$")[,-1], " \n", 
-                                       str_match(allResultsProportions$GeneSet, "^[A-Za-z]+.gene(.*)$")[,-1], sep = "")
+allProportionsPerRegion$GeneSet <- paste(str_match(allProportionsPerRegion$GeneSet, "^([A-Za-z]+.gene).*$")[,-1], " \n", 
+                                       str_match(allProportionsPerRegion$GeneSet, "^[A-Za-z]+.gene(.*)$")[,-1], sep = "")
 
-allResultsFrequencies <- allResultsFrequencies[order(factor(allResultsFrequencies$GeneSet, 
+allFrequencies <- allFrequencies[order(factor(allFrequencies$GeneSet, 
                                                             levels = c("Control gene \n No Expression", "R-gene \n No Expression",
                                                                        "Control gene \n Low Expression", "R-gene \n Low Expression"))),]
 
-allResultsProportions <- allResultsProportions[order(factor(allResultsProportions$GeneSet, 
+allProportionsPerRegion <- allProportionsPerRegion[order(factor(allProportionsPerRegion$GeneSet, 
                                                             levels = c("Control gene \n No Expression", "R-gene \n No Expression",
                                                                        "Control gene \n Low Expression", "R-gene \n Low Expression"))),]
 
@@ -41,10 +41,10 @@ my_comparisons <- list(c("Control gene \n No Expression", "R-gene \n No Expressi
                        c("R-gene \n No Expression", "R-gene \n Low Expression"))
 
 # Plot bar graph.
-for (mod in unique(allResultsProportions$Mod.TF)) {
-  df <- allResultsFrequencies[allResultsFrequencies$Mod.TF==mod,]
+for (mod in unique(allProportionsPerRegion$Mod.TF)) {
+  df <- allFrequencies[allFrequencies$Mod.TF==mod,]
   
-  comparison_df <- allResultsProportions[allResultsProportions$Mod.TF==mod,]
+  comparison_df <- allProportionsPerRegion[allProportionsPerRegion$Mod.TF==mod,]
   
   stat.test <- comparison_df %>% group_by(axisGroup) %>% 
     t_test(Proportion ~ GeneSet, comparisons = my_comparisons) %>% 

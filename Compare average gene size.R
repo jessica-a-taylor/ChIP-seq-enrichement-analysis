@@ -10,14 +10,14 @@ library(rstudioapi)
 
 # Determine whether there is still a significant difference between R-genes and control genes of each size category.
 if (normalised == TRUE) {
-  allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allResultsProportions.csv", sep = "")))  
+  allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allProportionsPerRegion.csv", sep = "")))  
   geneWidth <- data.frame(read_csv(paste("PlantExp data\\Normalised\\geneWidth.csv", sep = "")))  
 } else if (normalised == FALSE) {
-  allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allResultsProportions.csv", sep = "")))
+  allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allProportionsPerRegion.csv", sep = "")))
   geneWidth <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\geneWidth.csv", sep = "")))  
 }
 
-allResultsProportions$Size <- rep("size", times = nrow(allResultsProportions))
+allProportionsPerRegion$Size <- rep("size", times = nrow(allProportionsPerRegion))
 
 
 # Small genes
@@ -40,9 +40,9 @@ if (normalised == TRUE) {
   ggsave("Graphs\\Non-normalised\\Small gene width comparison.png", plot = plot, width = 8, height = 4) 
 }
 
-# Add gene size to 'allResultsProportions'.
+# Add gene size to 'allProportionsPerRegion'.
 for (row in 1:nrow(smallGenes)) {
-  allResultsProportions[which(allResultsProportions$Gene == smallGenes[row,"Gene"]),"Size"] <- rep("Small", times = nrow(allResultsProportions[which(allResultsProportions$Gene == smallGenes[row,"Gene"]),]))
+  allProportionsPerRegion[which(allProportionsPerRegion$Gene == smallGenes[row,"Gene"]),"Size"] <- rep("Small", times = nrow(allProportionsPerRegion[which(allProportionsPerRegion$Gene == smallGenes[row,"Gene"]),]))
 }
 
 
@@ -68,9 +68,9 @@ if (normalised == TRUE) {
   ggsave("Graphs\\Non-normalised\\Medium gene width comparison.png", plot = plot, width = 8, height = 4) 
 }
 
-# Add gene size to 'allResultsProportions'.
+# Add gene size to 'allProportionsPerRegion'.
 for (row in 1:nrow(mediumGenes)) {
-  allResultsProportions[which(allResultsProportions$Gene == mediumGenes[row,"Gene"]),"Size"] <- rep("Medium", times = nrow(allResultsProportions[which(allResultsProportions$Gene == mediumGenes[row,"Gene"]),]))
+  allProportionsPerRegion[which(allProportionsPerRegion$Gene == mediumGenes[row,"Gene"]),"Size"] <- rep("Medium", times = nrow(allProportionsPerRegion[which(allProportionsPerRegion$Gene == mediumGenes[row,"Gene"]),]))
 }
 
 
@@ -93,17 +93,17 @@ if (normalised == TRUE) {
 } else if (normalised == FALSE) {
   ggsave("Graphs\\Non-normalised\\Large gene width comparison.png", plot = plot, width = 8, height = 4) 
 }
-# Add gene size to 'allResultsProportions'.
+# Add gene size to 'allProportionsPerRegion'.
 for (row in 1:nrow(bigGenes)) {
-  allResultsProportions[which(allResultsProportions$Gene == bigGenes[row,"Gene"]),"Size"] <- rep("Large", times = nrow(allResultsProportions[which(allResultsProportions$Gene == bigGenes[row,"Gene"]),]))
+  allProportionsPerRegion[which(allProportionsPerRegion$Gene == bigGenes[row,"Gene"]),"Size"] <- rep("Large", times = nrow(allProportionsPerRegion[which(allProportionsPerRegion$Gene == bigGenes[row,"Gene"]),]))
 }
 
 # Plot bargraph.
-allResultsProportions$GeneSet <- paste(str_match(allResultsProportions$GeneSet, "^([A-Za-z]+.gene).*$")[,-1], " \n", 
-                                       str_match(allResultsProportions$GeneSet, "^[A-Za-z]+.gene(.*)$")[,-1], sep = "")
+allProportionsPerRegion$GeneSet <- paste(str_match(allProportionsPerRegion$GeneSet, "^([A-Za-z]+.gene).*$")[,-1], " \n", 
+                                       str_match(allProportionsPerRegion$GeneSet, "^[A-Za-z]+.gene(.*)$")[,-1], sep = "")
 
 
-allResultsProportions <- allResultsProportions[order(factor(allResultsProportions$GeneSet, 
+allProportionsPerRegion <- allProportionsPerRegion[order(factor(allProportionsPerRegion$GeneSet, 
                                                             levels = c("Control gene \n No Expression", "R-gene \n No Expression",
                                                                        "Control gene \n Low Expression", "R-gene \n Low Expression"))),]
 
@@ -112,9 +112,9 @@ my_comparisons <- list(c("Control gene \n No Expression", "R-gene \n No Expressi
                        c("Control gene \n Low Expression", "R-gene \n Low Expression"),
                        c("R-gene \n No Expression", "R-gene \n Low Expression"))
 
-for (size in unique(allResultsProportions$Size)) {
+for (size in unique(allProportionsPerRegion$Size)) {
   if (size != "size") {
-    df <- allResultsProportions[allResultsProportions$Size==size,]
+    df <- allProportionsPerRegion[allProportionsPerRegion$Size==size,]
     
     for (mod in unique(df$Mod.TF)) {
       df1 <- df[df$Mod.TF==mod,]
