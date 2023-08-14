@@ -66,24 +66,16 @@ for (mod in unique(ChIP_experiments$`Modification/TF`)) {
   nextflowOutput[which(nextflowOutput$experiment %in% focusExperiments),"Mod.TF"] <- mod
 }
 
-rm(focusModification, data, file, mod, n, row)
+rm(focusModification, data, file, mod, row)
 
 # Perform enrichment analysis.
-
-# Import coordinates of the genomic regions of interest.
-genomicData <- as.data.frame(read_csv("Protein coding genes.csv"))
-genomicData <- genomicData[,-1]
-
-# Import list of R-genes.
-NLR_genes <- as.data.frame(read_xlsx("Arabidopsis NLRs.xlsx", sheet = 1))
-NLR_genes <- genomicData[which(genomicData$Gene %in% NLR_genes$Gene),]
 
 # Sample 1000 random control genes, then sort R-genes and control genes based on expression level.
 # Ensure that the number of R-genes and control genes is the same for a particular expression level.
 source("Functions\\PlantExp.R")
 
 for (normalised in c(TRUE, FALSE)) {
-  sampleGenes <- PlantExp(genomicData, NLR_genes)
+  sampleGenes <- PlantExp(NLR_genes)
 
   # Plot average gene size between R-genes and control genes.
   geneWidth <- data.frame()

@@ -6,10 +6,6 @@ library(readr)
 genomicData <- as.data.frame(read_csv("Protein coding genes.csv"))
 genomicData <- genomicData[,-1]
 
-# Import list of R-genes.
-NLR_genes <- as.data.frame(read_xlsx("Arabidopsis NLRs.xlsx", sheet = 1))
-NLR_genes <- genomicData[which(genomicData$Gene %in% NLR_genes$Gene),]
-
 # Create a list of files in the folder for a particular tissue type.
 filenames <- list.files(path = "PlantExp data\\Control\\" ,pattern="*.tsv")
 expressionData <- data.frame()
@@ -30,7 +26,8 @@ for (row in 1:nrow(genomicData)) {
                                                  width = genomicData[row,"width"],
                                                  strand = genomicData[row,"strand"],
                                                  ranges = genomicData[row,"ranges"],
+                                                 Chromosomal.Region = genomicData[row, "Chromosomal.Region"],
                                                  TPM = mean(expressionData[expressionData$geneId == genomicData[row,"Gene"],"TPM"])))
 }
 
-write.csv(geneExpression, paste("PlantExp data\\geneExpression.csv", sep = "")) 
+write.csv(PlantExpData, paste("PlantExp data\\geneExpression.csv", sep = "")) 

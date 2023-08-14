@@ -1,13 +1,14 @@
 # Function to get filtered expression data for each set of sample genes in each tissue. 
-PlantExp <- function(genomicData, NLR_genes) {
+PlantExp <- function(NLR_data) {
 
   # Import expression data.
   PlantExpData <- as.data.frame(read_csv("PlantExp data\\geneExpression.csv"))
   PlantExpData <- PlantExpData[-c(which(is.na(PlantExpData$TPM))),]
   
-
   # Extract the R-genes.
-  NLR_data <- PlantExpData[c(which(PlantExpData$Gene %in% NLR_genes$Gene)),]
+  # Import list of R-genes.
+  NLR_data <- as.data.frame(read_xlsx("Arabidopsis NLRs.xlsx", sheet = 1))
+  NLR_data <- PlantExpData[c(which(PlantExpData$Gene %in% NLR_data$Gene)),]
   NLR_data$GeneSet <- rep("R-gene", times = nrow(NLR_data))
   
   
@@ -18,8 +19,9 @@ PlantExp <- function(genomicData, NLR_genes) {
     for (n in seq(from = .1, to = 1, by = .1)) {
       candidateGenes <- append(candidateGenes, sample(PlantExpData[which(PlantExpData$width > quantile(NLR_data$width, probs = n-.1) &
                                                                            PlantExpData$width <= quantile(NLR_data$width, probs = n-.05) &
-                                                                          !(PlantExpData$Gene %in% candidateGenes) &
-                                                                           PlantExpData$TPM < max(NLR_data$TPM)),"Gene"], 100))
+                                                                          !(PlantExpData$Gene %in% candidateGenes)),
+                                                                           #PlantExpData$TPM < max(NLR_data$TPM)),
+                                                                   "Gene"], 100))
       
       control_data <- rbind(control_data, 
                              PlantExpData[which(PlantExpData$Gene %in% candidateGenes),]) 
