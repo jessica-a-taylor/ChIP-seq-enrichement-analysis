@@ -1,6 +1,6 @@
 # Function to get the coordinates of each gene region.
 
-getGeneCoordinates <- function(dataToUse) {
+getGeneCoordinates <- function(dataToUse, genomicData) {
   # Create new dataframes for chunks of the gene body (20% intervals of the gene length).
   geneChunks <- hash(width20 = dataToUse[,c(which(colnames(dataToUse) != "start" & colnames(dataToUse) != "end" &
                                                     colnames(dataToUse) != "width" & colnames(dataToUse) != "ranges"))], 

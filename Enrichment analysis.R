@@ -72,14 +72,14 @@ rm(focusModification, data, file, mod, row)
 source("Functions\\PlantExp.R")
 
 for (normalised in c(TRUE, FALSE)) {
-  sampleGenesPlantExp <- PlantExp(normalised)
+  sampleGenes <- PlantExp(normalised)
   
   # Plot average gene size between R-genes and control genes.
   geneWidth <- data.frame()
-  for (set in names(sampleGenesPlantExp)) {
-    geneWidth <- rbind(geneWidth, data.frame(Gene = sampleGenesPlantExp[[set]]$Gene,
-                                             GeneSet = sampleGenesPlantExp[[set]]$GeneSet,
-                                             GeneWidth = sampleGenesPlantExp[[set]]$width/1000))
+  for (set in names(sampleGenes)) {
+    geneWidth <- rbind(geneWidth, data.frame(Gene = sampleGenes[[set]]$Gene,
+                                             GeneSet = sampleGenes[[set]]$GeneSet,
+                                             GeneWidth = sampleGenes[[set]]$width/1000))
   }
   
   plot <- ggplot(geneWidth, aes(x = GeneSet, y = GeneWidth)) +

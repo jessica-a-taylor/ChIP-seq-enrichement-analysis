@@ -20,6 +20,9 @@ source("Functions\\Get range - merge gene coordinates.R")
 source("Functions\\Expression column.R")
 source("Functions\\AxisGroup column.R")
 
+genomicData <- as.data.frame(read_csv("Protein coding genes.csv"))
+genomicData <- genomicData[,-1]
+
 # Create a hash for storing the proportion of each gene region overlapping with a significant peak.
 sampleGenesProportionsPerRegion <- hash()
 
@@ -48,12 +51,12 @@ for (set in names(sampleGenes)) {
   # Determine the proportion of each gene overlapping with a significant peak.
   proportionPerGene <- hash()
   
-  if (set %in% c("R-gene Low Expression","R-gene No Expression"  )) {
+  if (set %in% c("R-gene Low Expression","R-gene No Expression")) {
     proportionPerGene <- proportionPerGeneFunction(allOverlaps, nextflowOutput, genomicData, proportionPerGene, set)
   }
   
   # Determine the proportion of each gene region overlapping with a significant peak.
-  geneRegions <- getGeneCoordinates(geneSet)
+  geneRegions <- getGeneCoordinates(geneSet, genomicData)
   
   proportionPerRegion <- proportionPerRegionFunction(geneRegions, allOverlaps, nextflowOutput)
   
@@ -110,5 +113,3 @@ if (normalised == TRUE) {
   write.csv(allProportionsPerGene, paste("PlantExp data\\Non-normalised\\allProportionsPerGene.csv", sep = "")) 
   write.csv(allProportionsPerRegion, paste("PlantExp data\\Non-normalised\\allProportionsPerRegion.csv", sep = "")) 
 }
-write.csv(geneFrequency, paste("PlantExp data\\allResultsFrequencies.csv", sep = "")) 
-write.csv(allResultsProportions, paste("PlantExp data\\allResultsProportions.csv", sep = "")) 

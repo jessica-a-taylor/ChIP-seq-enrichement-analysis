@@ -20,7 +20,7 @@ geneTypes <- geneTypes[c(which(geneTypes$V2=="protein_coding")),]
 Atgenes <- Atgenes[c(which(Atgenes$Gene %in% geneTypes$V1)),]
 
 # Remove duplicate genes (different versions).
-Atgenes <- Atgenes[-c(which(Atgenes$tx_name == str_match(Atgenes$tx_name, "^([0-9a-zA-Z]+)([.])([2-9])$")[,1])),]
+Atgenes <- Atgenes[c(which(Atgenes$tx_name == str_match(Atgenes$tx_name, "^([0-9a-zA-Z]+)([.])(1)$")[,1])),]
 
 # Add 'ranges' column.
 source("Functions\\Get range - merge gene coordinates.R")
