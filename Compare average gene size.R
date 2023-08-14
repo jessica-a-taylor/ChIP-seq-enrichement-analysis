@@ -7,6 +7,8 @@ library(rstatix)
 library(tidyverse)
 library(rstudioapi)
 
+# Compare average gene size between R-genes and control genes.
+geneWidth <- data.frame()
 
 # Determine whether there is still a significant difference between R-genes and control genes of each size category.
 if (normalised == TRUE) {
@@ -18,6 +20,25 @@ if (normalised == TRUE) {
 }
 
 allProportionsPerRegion$Size <- rep("size", times = nrow(allProportionsPerRegion))
+for (set in names(sampleGenesPlantExp)) {
+  geneWidth <- rbind(geneWidth, data.frame(Gene = sampleGenesPlantExp[[set]]$Gene,
+                                           GeneSet = sampleGenesPlantExp[[set]]$GeneSet,
+                                           GeneWidth = sampleGenesPlantExp[[set]]$width/1000))
+  
+}
+
+
+plot <- ggplot(geneWidth, aes(x = GeneSet, y = GeneWidth)) +
+  geom_boxplot() + labs(x = "Gene set", y = "Gene width (kb)") +
+  stat_compare_means(label = "p.signif", method = "t.test",
+                     ref.group = "R-gene") + theme_bw() 
+
+ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
+
+
+# Determine whether there is still a significant difference between R-genes and control genes of each size category.
+allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\allResultsProportions.csv", sep = "")))
+allResultsProportions$Size <- rep("size", times = nrow(allResultsProportions))
 
 
 # Small genes
@@ -34,11 +55,7 @@ plot <- ggplot(smallGenes, aes(x = GeneSet, y = GeneWidth)) +
   stat_compare_means(label = "p.signif", method = "t.test",
                      ref.group = "R-gene") + theme_bw()
 
-if (normalised == TRUE) {
-  ggsave("Graphs\\Normalised\\Small gene width comparison.png", plot = plot, width = 8, height = 4) 
-} else if (normalised == FALSE) {
-  ggsave("Graphs\\Non-normalised\\Small gene width comparison.png", plot = plot, width = 8, height = 4) 
-}
+ggsave("Graphs\\Small gene width comparison.png", plot = plot, width = 8, height = 4) 
 
 # Add gene size to 'allProportionsPerRegion'.
 for (row in 1:nrow(smallGenes)) {
@@ -62,11 +79,7 @@ plot <- ggplot(mediumGenes, aes(x = GeneSet, y = GeneWidth)) +
   stat_compare_means(label = "p.signif", method = "t.test",
                      ref.group = "R-gene") + theme_bw()
 
-if (normalised == TRUE) {
-  ggsave("Graphs\\Normalised\\Medium gene width comparison.png", plot = plot, width = 8, height = 4) 
-} else if (normalised == FALSE) {
-  ggsave("Graphs\\Non-normalised\\Medium gene width comparison.png", plot = plot, width = 8, height = 4) 
-}
+ggsave("Graphs\\Medium gene width comparison.png", plot = plot, width = 8, height = 4) 
 
 # Add gene size to 'allProportionsPerRegion'.
 for (row in 1:nrow(mediumGenes)) {
@@ -94,6 +107,9 @@ if (normalised == TRUE) {
   ggsave("Graphs\\Non-normalised\\Large gene width comparison.png", plot = plot, width = 8, height = 4) 
 }
 # Add gene size to 'allProportionsPerRegion'.
+ggsave("Graphs\\Big gene width comparison.png", plot = plot, width = 8, height = 4) 
+
+# Add gene size to 'allResultsProportions'.
 for (row in 1:nrow(bigGenes)) {
   allProportionsPerRegion[which(allProportionsPerRegion$Gene == bigGenes[row,"Gene"]),"Size"] <- rep("Large", times = nrow(allProportionsPerRegion[which(allProportionsPerRegion$Gene == bigGenes[row,"Gene"]),]))
 }
@@ -171,3 +187,4 @@ for (size in unique(allProportionsPerRegion$Size)) {
     }
   } else next
 }
+jobRunScript("Plot enrichment by size.R",  importEnv = TRUE)

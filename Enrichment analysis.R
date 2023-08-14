@@ -17,7 +17,6 @@ library(rstatix)
 library(tidyverse)
 library(glue)
 
-
 # Enrichment analysis based on the occurrence of significant peaks.
 source("Functions\\Get range - merge gene coordinates.R")
 source("Functions\\Expression column.R")
@@ -68,40 +67,38 @@ for (mod in unique(ChIP_experiments$`Modification/TF`)) {
 
 rm(focusModification, data, file, mod, row)
 
-# Perform enrichment analysis.
-
 # Sample 1000 random control genes, then sort R-genes and control genes based on expression level.
 # Ensure that the number of R-genes and control genes is the same for a particular expression level.
 source("Functions\\PlantExp.R")
 
 for (normalised in c(TRUE, FALSE)) {
-  sampleGenes <- PlantExp(NLR_genes)
-
+  sampleGenesPlantExp <- PlantExp(normalised)
+  
   # Plot average gene size between R-genes and control genes.
   geneWidth <- data.frame()
-  
-  for (set in names(sampleGenes)) {
-    geneWidth <- rbind(geneWidth, data.frame(Gene = sampleGenes[[set]]$Gene,
-                                             GeneSet = sampleGenes[[set]]$GeneSet,
-                                             GeneWidth = sampleGenes[[set]]$width/1000))
-    
+  for (set in names(sampleGenesPlantExp)) {
+    geneWidth <- rbind(geneWidth, data.frame(Gene = sampleGenesPlantExp[[set]]$Gene,
+                                             GeneSet = sampleGenesPlantExp[[set]]$GeneSet,
+                                             GeneWidth = sampleGenesPlantExp[[set]]$width/1000))
   }
   
   plot <- ggplot(geneWidth, aes(x = GeneSet, y = GeneWidth)) +
     geom_boxplot() + labs(x = "Gene set", y = "Gene width (kb)") +
     stat_compare_means(label = "p.signif", method = "wilcox.test",
-                       ref.group = "R-gene") + theme_bw() 
+                       ref.group = "R-gene") + theme_bw()
   
   if (normalised == TRUE) {
     write.csv(geneWidth, paste("PlantExp data\\Normalised\\geneWidth.csv", sep = "")) 
     ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
   } else if (normalised == FALSE) {
     write.csv(geneWidth, paste("PlantExp data\\Non-normalised\\geneWidth.csv", sep = "")) 
-    ggsave("Graphs\\Non-normalised\\Gene width comparison.png", plot = plot, width = 4, height = 3)  
+    ggsave("Graphs\\Non-normalised\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
   }
+  # Perform enrichment analysis.
   jobRunScript("Script for analysis.R", importEnv = TRUE)
 }
 
+# Generate enrichment plots.
 for (normalised in c(TRUE, FALSE)) {
   jobRunScript("Plot enrichment.R",  importEnv = TRUE)
   jobRunScript("Compare average gene size.R",  importEnv = TRUE) 

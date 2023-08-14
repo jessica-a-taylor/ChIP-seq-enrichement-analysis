@@ -18,6 +18,8 @@ if (normalised == TRUE) {
   allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allProportionsPerRegion.csv", sep = "")))
 }
 
+allResultsFrequencies <- data.frame(read_csv(paste("PlantExp data\\allResultsFrequencies.csv", sep = "")))
+allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\allResultsProportions.csv", sep = "")))
 
   
 # Replace comma in 'Comparisons' column with \n.
@@ -76,9 +78,5 @@ for (mod in unique(allProportionsPerRegion$Mod.TF)) {
   plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
                 font.ytickslab = 8)
   
-  if (normalised == TRUE) {
-    ggsave(paste("Graphs\\Normalised\\Enrichment\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
-  } else if (normalised == FALSE) {
-    ggsave(paste("Graphs\\Non-normalised\\Enrichment\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
-  }
+  ggsave(paste("Graphs\\Enrichment\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
 }

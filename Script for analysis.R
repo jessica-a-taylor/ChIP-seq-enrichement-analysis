@@ -110,4 +110,5 @@ if (normalised == TRUE) {
   write.csv(allProportionsPerGene, paste("PlantExp data\\Non-normalised\\allProportionsPerGene.csv", sep = "")) 
   write.csv(allProportionsPerRegion, paste("PlantExp data\\Non-normalised\\allProportionsPerRegion.csv", sep = "")) 
 }
-
+write.csv(geneFrequency, paste("PlantExp data\\allResultsFrequencies.csv", sep = "")) 
+write.csv(allResultsProportions, paste("PlantExp data\\allResultsProportions.csv", sep = "")) 
