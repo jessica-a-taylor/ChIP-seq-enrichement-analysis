@@ -136,63 +136,57 @@ getGeneCoordinates <- function(dataToUse, genomicData) {
   # Get the coordinates for the upstream intergenic regions.
   usCoordinates <- c()
   
-  if (nrow(dataToUse) >= 1) {
-    for (gene in dataToUse$Gene) {
-      currentGene <- which(genomicData$Gene==gene)
+  for (gene in dataToUse$Gene) {
+    currentGene <- which(genomicData$Gene==gene)
+    
+    if (genomicData[currentGene, "strand"]=="+") {
+      previousGene <- currentGene - 1
       
-      if (genomicData[currentGene, "strand"]=="+") {
-        previousGene <- currentGene - 1
-        
-        if (previousGene > 0 & previousGene < nrow(genomicData)) {
-          if (as.numeric(genomicData[currentGene, "seqnames"])==as.numeric(genomicData[previousGene, "seqnames"]) & 
-              genomicData[previousGene, "strand"]=="+") {
-            
-            distance <- (genomicData[currentGene, "start"] - 1001) - (genomicData[previousGene, "end"] + 201)
-            
-            if (distance > 0) {
-              usCoordinates <- append(usCoordinates, paste(genomicData[previousGene, "end"] + 201, "-", genomicData[previousGene, "end"] + 201 + distance, sep = "")) 
-            } else usCoordinates <- append(usCoordinates, NA)
-          }
+      if (previousGene > 0 & previousGene < nrow(genomicData)) {
+        if (as.numeric(genomicData[currentGene, "seqnames"])==as.numeric(genomicData[previousGene, "seqnames"]) & 
+            genomicData[previousGene, "strand"]=="+") {
           
-          else if (as.numeric(genomicData[currentGene, "seqnames"])==as.numeric(genomicData[previousGene, "seqnames"]) & 
-                   genomicData[previousGene, "strand"]=="-") {
-            
-            distance <- (genomicData[currentGene, "start"] - 1001) - (genomicData[previousGene, "end"] + 1001)
-            
-            if (distance > 0) {
-              usCoordinates <- append(usCoordinates, paste(genomicData[previousGene, "end"] + 1001, "-", genomicData[previousGene, "end"] + 1001 + distance, sep = "")) 
-            } else usCoordinates <- append(usCoordinates, NA)
-            
+          distance <- (genomicData[currentGene, "start"] - 1001) - (genomicData[previousGene, "end"] + 201)
+          
+          if (distance > 0) {
+            usCoordinates <- append(usCoordinates, paste(genomicData[previousGene, "end"] + 201, "-", genomicData[previousGene, "end"] + 201 + distance, sep = "")) 
+          } else usCoordinates <- append(usCoordinates, NA)
+        }
+        else if (as.numeric(genomicData[currentGene, "seqnames"])==as.numeric(genomicData[previousGene, "seqnames"]) & 
+                 genomicData[previousGene, "strand"]=="-") {
+          
+          distance <- (genomicData[currentGene, "start"] - 1001) - (genomicData[previousGene, "end"] + 1001)
+          
+          if (distance > 0) {
+            usCoordinates <- append(usCoordinates, paste(genomicData[previousGene, "end"] + 1001, "-", genomicData[previousGene, "end"] + 1001 + distance, sep = "")) 
           } else usCoordinates <- append(usCoordinates, NA)
         } else usCoordinates <- append(usCoordinates, NA)
-      }
-      else if (genomicData[currentGene, "strand"]=="-") {
-        previousGene <- currentGene + 1
-        
-        if (previousGene > 0 & previousGene < nrow(genomicData)) {
-          if (as.numeric(genomicData[currentGene, "seqnames"])==as.numeric(genomicData[previousGene, "seqnames"]) &
-              genomicData[previousGene, "strand"]=="+") {
-            
-            distance <- (genomicData[previousGene, "start"] - 1001) - (genomicData[currentGene, "end"] + 1001)
-            
-            if (distance > 0) {
-              usCoordinates <- append(usCoordinates, paste(genomicData[previousGene, "start"] - 1001 - distance, "-", genomicData[previousGene, "start"] - 1001, sep = "")) 
-            } else usCoordinates <- append(usCoordinates, NA)
-            
-          }
-          
-          else if (as.numeric(genomicData[currentGene, "seqnames"])==as.numeric(genomicData[previousGene, "seqnames"]) & 
-                   genomicData[previousGene, "strand"]=="-") {
-            
-            distance <- (genomicData[previousGene, "start"] - 201) - (genomicData[currentGene, "end"] + 1001)
-            if (distance > 0) {
-              usCoordinates <- append(usCoordinates, paste(genomicData[previousGene, "start"] - 201 - distance, "-", genomicData[previousGene, "start"] - 201, sep = "")) 
-            } else usCoordinates <- append(usCoordinates, NA)
-            
-          } else usCoordinates <- append(usCoordinates, NA)
-        } else usCoordinates <- append(usCoordinates, NA)
-      } 
+      } else usCoordinates <- append(usCoordinates, NA)
     }
+    else if (genomicData[currentGene, "strand"]=="-") {
+      previousGene <- currentGene + 1
+      
+      if (previousGene > 0 & previousGene < nrow(genomicData)) {
+        if (as.numeric(genomicData[currentGene, "seqnames"])==as.numeric(genomicData[previousGene, "seqnames"]) &
+            genomicData[previousGene, "strand"]=="+") {
+          
+          distance <- (genomicData[previousGene, "start"] - 1001) - (genomicData[currentGene, "end"] + 1001)
+          
+          if (distance > 0) {
+            usCoordinates <- append(usCoordinates, paste(genomicData[previousGene, "start"] - 1001 - distance, "-", genomicData[previousGene, "start"] - 1001, sep = "")) 
+          } else usCoordinates <- append(usCoordinates, NA)
+        }
+        else if (as.numeric(genomicData[currentGene, "seqnames"])==as.numeric(genomicData[previousGene, "seqnames"]) & 
+                 genomicData[previousGene, "strand"]=="-") {
+          
+          distance <- (genomicData[previousGene, "start"] - 201) - (genomicData[currentGene, "end"] + 1001)
+          
+          if (distance > 0) {
+            usCoordinates <- append(usCoordinates, paste(genomicData[previousGene, "start"] - 201 - distance, "-", genomicData[previousGene, "start"] - 201, sep = "")) 
+          } else usCoordinates <- append(usCoordinates, NA)
+        } else usCoordinates <- append(usCoordinates, NA)
+      } else usCoordinates <- append(usCoordinates, NA)
+    } 
   }
   
   

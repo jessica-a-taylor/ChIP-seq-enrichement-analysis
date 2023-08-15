@@ -12,12 +12,14 @@ proportionPerGeneFunction <- function (allOverlaps, nextflowOutput, genomicData,
       if (genomicData[genomicData$Gene==n,"width"] >= sum(allOverlaps[[n]][[mod]]$width)) {
         proportionDF <- rbind(proportionDF, data.frame(Gene = n,
                                                        `Mod.TF` = mod,
-                                                       Proportion = sum(allOverlaps[[n]][[mod]]$width)/(genomicData[genomicData$Gene==n,"width"]))) 
+                                                       Proportion = sum(allOverlaps[[n]][[mod]]$width)/(genomicData[genomicData$Gene==n,"width"]),
+                                                       ExpressionLevel = str_match(set, "^R-gene (.*)$")[,2])) 
         
       } else if (genomicData[genomicData$Gene==n,"width"] < sum(allOverlaps[[n]][[mod]]$width)) {
         proportionDF <- rbind(proportionDF, data.frame(Gene = n,
                                                        `Mod.TF` = mod,
-                                                       Proportion = 1))
+                                                       Proportion = 1,
+                                                       ExpressionLevel = str_match(set, "^R-gene (.*)$")[,2]))
       }
     }
   } 

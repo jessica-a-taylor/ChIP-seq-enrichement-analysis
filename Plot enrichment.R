@@ -13,14 +13,13 @@ axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20
 if (normalised == TRUE) {
   allFrequencies <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allFrequencies.csv", sep = "")))
   allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allProportionsPerRegion.csv", sep = "")))  
+  allProportionsPerGene <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allProportionsPerGene.csv", sep = "")))  
 } else if (normalised == FALSE) {
   allFrequencies <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allFrequencies.csv", sep = "")))
   allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allProportionsPerRegion.csv", sep = "")))
+  allProportionsPerGene <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allProportionsPerGene.csv", sep = "")))  
+  
 }
-
-allResultsFrequencies <- data.frame(read_csv(paste("PlantExp data\\allResultsFrequencies.csv", sep = "")))
-allResultsProportions <- data.frame(read_csv(paste("PlantExp data\\allResultsProportions.csv", sep = "")))
-
   
 # Replace comma in 'Comparisons' column with \n.
 allFrequencies$GeneSet <- paste(str_match(allFrequencies$GeneSet, "^([A-Za-z]+.gene).*$")[,-1], " \n", 
@@ -42,7 +41,7 @@ my_comparisons <- list(c("Control gene \n No Expression", "R-gene \n No Expressi
                        c("Control gene \n Low Expression", "R-gene \n Low Expression"),
                        c("R-gene \n No Expression", "R-gene \n Low Expression"))
 
-# Plot bar graph.
+# Plot bar graph of average enrichment per region.
 for (mod in unique(allProportionsPerRegion$Mod.TF)) {
   df <- allFrequencies[allFrequencies$Mod.TF==mod,]
   
@@ -78,5 +77,25 @@ for (mod in unique(allProportionsPerRegion$Mod.TF)) {
   plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
                 font.ytickslab = 8)
   
-  ggsave(paste("Graphs\\Enrichment\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+  ggsave(paste("Graphs\\Normalised\\Enrichment per region\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
+}
+
+# Plot bar graph of enrichment per gene.
+for (mod in unique(allProportionsPerGene$Mod.TF)) {
+  df <- allProportionsPerGene[allProportionsPerGene$Mod.TF==mod,]
+  
+  plot <- ggplot(df, aes(x = Gene, y = Proportion, fill = ExpressionLevel)) +
+    scale_y_continuous(limits = c(0,1), expand = c(0,0)) + 
+    scale_fill_manual(values = c("cadetblue","lightsalmon2")) +
+    geom_bar(stat = "identity", position = "dodge") + 
+    theme_bw() +
+    labs(x = "Gene", y = "Enrichment", title = mod) +
+    coord_cartesian(ylim= c(0,1), clip = "off") + 
+    theme(plot.margin = unit(c(1,1,.3,1), "lines"), 
+          plot.title = element_text(vjust = 3, hjust = 0, size = 14),
+          axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5), 
+          axis.text.y = element_text(size = 10),
+          axis.title.y = element_text(size = 12, vjust = 2)) 
+  
+  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
 }
