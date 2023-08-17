@@ -9,16 +9,35 @@ proportionPerGeneFunction <- function (allOverlaps, nextflowOutput, genomicData,
   
   for (n in names(allOverlaps)) {
     for (mod in unique(nextflowOutput[, "Mod.TF"])) {
-      if (genomicData[genomicData$Gene==n,"width"] >= sum(allOverlaps[[n]][[mod]]$width)) {
-        proportionDF <- rbind(proportionDF, data.frame(Gene = n,
-                                                       `Mod.TF` = mod,
-                                                       Proportion = sum(allOverlaps[[n]][[mod]]$width)/(genomicData[genomicData$Gene==n,"width"]),
-                                                       ExpressionLevel = str_match(set, "^R-gene (.*)$")[,2])) 
+      peakWidths <- c()
+      
+      if (nrow(allOverlaps[[n]][[mod]]) >= 1) {
+        for (row in 1:nrow(allOverlaps[[n]][[mod]])) {
+          if (overlapsFunction(as.numeric(allOverlaps[[n]][[mod]][row,"start"]), as.numeric(allOverlaps[[n]][[mod]][row,"end"]),
+                               geneRegions[["Promotor1000"]][geneRegions[["Promotor1000"]]$Gene==n,"start"],
+                               geneRegions[["Promotor1000"]][geneRegions[["Promotor1000"]]$Gene==n,"end"])==TRUE) {
+            
+            peakWidths <- append(peakWidths, allOverlaps[[n]][[mod]][row,"width"])
+          } else peakWidths <- peakWidths
+        }
         
-      } else if (genomicData[genomicData$Gene==n,"width"] < sum(allOverlaps[[n]][[mod]]$width)) {
+        if (1000 >= sum(peakWidths)) {
+          proportionDF <- rbind(proportionDF, data.frame(Gene = n,
+                                                         `Mod.TF` = mod,
+                                                         Proportion = sum(peakWidths)/1000,
+                                                         ExpressionLevel = str_match(set, "^R-gene (.*)$")[,2])) 
+          
+        } else if (1000 < sum(sum(peakWidths))) {
+          proportionDF <- rbind(proportionDF, data.frame(Gene = n,
+                                                         `Mod.TF` = mod,
+                                                         Proportion = 1,
+                                                         ExpressionLevel = str_match(set, "^R-gene (.*)$")[,2]))
+        }
+      }
+      else if (nrow(allOverlaps[[n]][[mod]]) < 1) {
         proportionDF <- rbind(proportionDF, data.frame(Gene = n,
                                                        `Mod.TF` = mod,
-                                                       Proportion = 1,
+                                                       Proportion = 0,
                                                        ExpressionLevel = str_match(set, "^R-gene (.*)$")[,2]))
       }
     }

@@ -26,12 +26,18 @@ genomicData <- genomicData[,-1]
 # Create a hash for storing the proportion of each gene region overlapping with a significant peak.
 sampleGenesProportionsPerRegion <- hash()
 
+# Create a hash for storing the proportion of each gene overlapping with a significant peak.
+proportionPerGene <- hash()
+
 # Generate a list of the number of genes in each set.
 geneCount <- data.frame()
 
 for (set in names(sampleGenes)) {
     
   geneSet <- sampleGenes[[set]]
+  
+  # Get the coordinates for each genomic region.
+  geneRegions <- getGeneCoordinates(geneSet, genomicData)
 
   # Create a hash containing the significant peaks in each gene. 
   allPeaks <- PeaksPerGene(geneSet, nextflowOutput)
@@ -49,15 +55,11 @@ for (set in names(sampleGenes)) {
   rm(genePeaks)
   
   # Determine the proportion of each gene overlapping with a significant peak.
-  proportionPerGene <- hash()
-  
   if (set %in% c("R-gene Low Expression","R-gene No Expression")) {
     proportionPerGene <- proportionPerGeneFunction(allOverlaps, nextflowOutput, genomicData, proportionPerGene, set)
   }
   
   # Determine the proportion of each gene region overlapping with a significant peak.
-  geneRegions <- getGeneCoordinates(geneSet, genomicData)
-  
   proportionPerRegion <- proportionPerRegionFunction(geneRegions, allOverlaps, nextflowOutput)
   
   # Add a column to 'proportionPerRegion' with the numbers for 
