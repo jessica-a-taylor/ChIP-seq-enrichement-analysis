@@ -32,7 +32,7 @@ proportionPerGene <- hash()
 # Generate a list of the number of genes in each set.
 geneCount <- data.frame()
 
-for (set in names(sampleGenes)) {
+for (set in names(sampleGenes)[3:4]) {
     
   geneSet <- sampleGenes[[set]]
   

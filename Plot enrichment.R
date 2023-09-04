@@ -88,47 +88,33 @@ for (mod in unique(allProportionsPerRegion$Mod.TF)) {
 # Plot bar graph of enrichment per gene.
 for (level in unique(allProportionsPerGene$ExpressionLevel)) {
   df <- allProportionsPerGene[allProportionsPerGene$ExpressionLevel==level,]
-  df <- df[which(df$Mod.TF %in% c("H3K4me3", "H3K36me3", "H3K9ac", "H3K27ac", "H3K27me3", "H2A.Z", "H2Bub", "H2AK121ub")),]
+  df <- df[which(df$Mod.TF %in% c("H3K4me3", "H3K36me3", "H3K9ac", "H3K27ac", "H3K27me3", "H2A.Z", "H2Bub", "H2AK121ub", "H3K4me1")),]
   
   plot <- ggplot(df, aes(Mod.TF, Gene)) +
     geom_tile(aes(fill = Proportion), colour = "white") +
-    scale_fill_gradient(low = "mistyrose", high = "indianred2") +
+    scale_fill_gradient(low = "white", high = "indianred2") +
     labs(x = "Histone modification", y = "Gene", fill = "Enrichment") +
     theme(axis.text.y = element_text(size = 11, colour = "grey13"),
           axis.text.x = element_text(size = 13, colour = "grey13"),
           axis.title = element_text(size = 16),
           legend.text = element_text(size = 12),
-          legend.title = element_text(size = 14))
-  
-  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level,"\\Promotor epigenetic enrichment per gene.png", sep = ""), plot = plot, width = 10, height = 16)
+          legend.title = element_text(size = 14)) 
+
+  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level,"promotor epigenetic enrichment.png", sep = ""), plot = plot, width = 14, height = 16)
   
   df <- allProportionsPerGene[allProportionsPerGene$ExpressionLevel==level,]
-  df <- df[which(df$Mod.TF %in% c("WRKY18", "WRKY33", "WRKY40")),]
+  df <- df[which(df$Mod.TF %in% c("WRKY18", "WRKY33", "WRKY40", "VAL1", "VAL2", "TPR1", "ATXR7", "HDA9", "REF6", "EDM2",
+                                  "LPH1", "SPTL6", "GBPL3", "CCA1", "TOC1", "LHY", "NUP1", "CRWN1")),]
   
   plot <- ggplot(df, aes(Mod.TF, Gene)) +
     geom_tile(aes(fill = Proportion), colour = "white") +
-    scale_fill_gradient(low = "mistyrose", high = "indianred2") +
+    scale_fill_gradient(low = "white", high = "indianred2") +
     labs(x = "Histone modification", y = "Gene", fill = "Enrichment") +
     theme(axis.text.y = element_text(size = 11, colour = "grey13"),
           axis.text.x = element_text(size = 13, colour = "grey13"),
           axis.title = element_text(size = 16),
           legend.text = element_text(size = 12),
-          legend.title = element_text(size = 14))
-  
-  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level,"\\Promotor TF enrichment per gene.png", sep = ""), plot = plot, width = 10, height = 16)
-  
-  df <- allProportionsPerGene[allProportionsPerGene$ExpressionLevel==level,]
-  df <- df[which(df$Mod.TF %in% c("CRWN1")),]
-  
-  plot <- ggplot(df, aes(Mod.TF, Gene)) +
-    geom_tile(aes(fill = Proportion), colour = "white") +
-    scale_fill_gradient(low = "mistyrose", high = "indianred2") +
-    labs(x = "Histone modification", y = "Gene", fill = "Enrichment") +
-    theme(axis.text.y = element_text(size = 11, colour = "grey13"),
-          axis.text.x = element_text(size = 13, colour = "grey13"),
-          axis.title = element_text(size = 16),
-          legend.text = element_text(size = 12),
-          legend.title = element_text(size = 14))
-  
-  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level,"\\Promotor NE protein enrichment per gene.png", sep = ""), plot = plot, width = 10, height = 16)
+          legend.title = element_text(size = 14)) 
+
+  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level, "promotor TF enrichment.png", sep = ""), plot = plot, width = 16, height = 16)
 }

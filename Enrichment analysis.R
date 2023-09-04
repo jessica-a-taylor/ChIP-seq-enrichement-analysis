@@ -17,22 +17,33 @@ library(rstatix)
 library(tidyverse)
 library(glue)
 
+setwd("C:/Users/jexy2/OneDrive/ChIP-seq-enrichment-analysis")
+
 # Enrichment analysis based on the occurrence of significant peaks.
 source("Functions\\Get range - merge gene coordinates.R")
 source("Functions\\Expression column.R")
 source("Functions\\Regions column.R")
 
-ChIP_experiments <- as.data.frame(read_csv("Nextflow_backup/ChIP experiment SRA data.csv"))
+ChIP_experiments <- as.data.frame(read_xlsx("Nextflow_backup/ChIP experiment SRA data.xlsx"))
 
 # Combine nextflow pipeline outputs into a single dataframe.
 nextflowOutput <- data.frame()
 
 for (file in list.files(path = "Nextflow_backup", pattern = "Peaks.bed")) {
+  # Rename file to include target modification/TF (if it has not been changed already).
+  if (str_detect(file, "_") == FALSE) {
+    file.rename(paste("Nextflow_backup/", file, sep = ""), paste("Nextflow_backup/", ChIP_experiments[which(ChIP_experiments$Sample %in% str_match(file, "^(SRR.*)merged.*$")[,2]), "Modification/TF"],
+                                                                 "_", file, sep = "")) 
+    
+    file <- paste(ChIP_experiments[which(ChIP_experiments$Sample %in% str_match(file, "^(SRR.*)merged.*$")[,2]), "Modification/TF"],
+                  "_", file, sep = "")
+  }
+  
   # Merge all broad and narrow peaks datasets.
   data <-  as.data.frame(import.bed(paste("Nextflow_backup/", file, sep = "")))
   
   # Add a column with the experiment code.
-  data$experiment <- rep(str_match(file, "^(SRR[0-9]+).*$")[,-1], times = nrow(data))
+  data$experiment <- rep(str_match(file, "^.*_(SRR[0-9]+).*$")[,-1], times = nrow(data))
   
   # Add data to 'nextflowOutput'.
   nextflowOutput <- rbind(nextflowOutput, data)
@@ -65,41 +76,42 @@ for (mod in unique(ChIP_experiments$`Modification/TF`)) {
   nextflowOutput[which(nextflowOutput$experiment %in% focusExperiments),"Mod.TF"] <- mod
 }
 
+# Remove rows with any remaining 'NAs'.
+nextflowOutput <- nextflowOutput[c(which(!is.na(nextflowOutput$Mod.TF))),]
+
 rm(focusModification, data, file, mod, row)
 
 # Sample 1000 random control genes, then sort R-genes and control genes based on expression level.
 # Ensure that the number of R-genes and control genes is the same for a particular expression level.
 source("Functions\\PlantExp.R")
 
-for (normalised in c(TRUE, FALSE)) {
-  sampleGenes <- PlantExp(normalised)
+normalised <- TRUE
+sampleGenes <- PlantExp(normalised)
   
-  # Plot average gene size between R-genes and control genes.
-  geneWidth <- data.frame()
-  for (set in names(sampleGenes)) {
-    geneWidth <- rbind(geneWidth, data.frame(Gene = sampleGenes[[set]]$Gene,
-                                             GeneSet = sampleGenes[[set]]$GeneSet,
-                                             GeneWidth = sampleGenes[[set]]$width/1000))
-  }
-  
-  plot <- ggplot(geneWidth, aes(x = GeneSet, y = GeneWidth)) +
-    geom_boxplot() + labs(x = "Gene set", y = "Gene width (kb)") +
-    stat_compare_means(label = "p.signif", method = "wilcox.test",
-                       ref.group = "R-gene") + theme_bw()
-  
-  if (normalised == TRUE) {
-    write.csv(geneWidth, paste("PlantExp data\\Normalised\\geneWidth.csv", sep = "")) 
-    ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
-  } else if (normalised == FALSE) {
-    write.csv(geneWidth, paste("PlantExp data\\Non-normalised\\geneWidth.csv", sep = "")) 
-    ggsave("Graphs\\Non-normalised\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
-  }
-  # Perform enrichment analysis.
-  jobRunScript("Script for analysis.R", importEnv = TRUE)
+# Plot average gene size between R-genes and control genes.
+geneWidth <- data.frame()
+for (set in names(sampleGenes)) {
+  geneWidth <- rbind(geneWidth, data.frame(Gene = sampleGenes[[set]]$Gene,
+                                           GeneSet = sampleGenes[[set]]$GeneSet,
+                                           GeneWidth = sampleGenes[[set]]$width/1000))
 }
 
-# Generate enrichment plots.
-for (normalised in c(TRUE, FALSE)) {
-  jobRunScript("Plot enrichment.R",  importEnv = TRUE)
-  jobRunScript("Compare average gene size.R",  importEnv = TRUE) 
+plot <- ggplot(geneWidth, aes(x = GeneSet, y = GeneWidth)) +
+  geom_boxplot() + labs(x = "Gene set", y = "Gene width (kb)") +
+  stat_compare_means(label = "p.signif", method = "wilcox.test",
+                     ref.group = "R-gene") + theme_bw()
+
+if (normalised == TRUE) {
+  write.csv(geneWidth, paste("PlantExp data\\Normalised\\geneWidth.csv", sep = "")) 
+  ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
+} else if (normalised == FALSE) {
+  write.csv(geneWidth, paste("PlantExp data\\Non-normalised\\geneWidth.csv", sep = "")) 
+  ggsave("Graphs\\Non-normalised\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
 }
+
+# Perform enrichment analysis.
+jobRunScript("Script for analysis.R", importEnv = TRUE)
+
+# Generate enrichment plots.
+jobRunScript("Plot enrichment.R",  importEnv = TRUE)
+jobRunScript("Compare average gene size.R",  importEnv = TRUE)

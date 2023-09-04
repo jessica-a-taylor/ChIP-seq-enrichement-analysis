@@ -55,10 +55,10 @@ PlantExp <- function(normalised) {
   expressionLevel <- c()
   
   for (row in 1:nrow(PlantExpData)) {
-    if (PlantExpData[row, "TPM"] <= quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .5)) {
+    if (PlantExpData[row, "TPM"] <= 5) {
       expressionLevel <- append(expressionLevel, "No Expression")
     }
-    else if (PlantExpData[row, "TPM"] > quantile(PlantExpData[PlantExpData$GeneSet=="R-gene",]$TPM, probs = .5)) {
+    else if (PlantExpData[row, "TPM"] > 5) {
       expressionLevel <- append(expressionLevel, "Low Expression")
     }
   }
