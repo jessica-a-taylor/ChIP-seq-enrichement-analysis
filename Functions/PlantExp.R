@@ -18,6 +18,7 @@ PlantExp <- function(normalised) {
     for (n in seq(from = .1, to = 1, by = .1)) {
       euchromaticGenes <- append(euchromaticGenes, sample(PlantExpData[which(PlantExpData$width > quantile(NLR_data$width, probs = n-.1) &
                                                                           PlantExpData$width <= quantile(NLR_data$width, probs = n) &
+                                                                          PlantExpData$Chromosomal.Region=="euchromatic" &
                                                                           !(PlantExpData$Gene %in% euchromaticGenes) &
                                                                           !(PlantExpData$Gene %in% NLR_data$Gene) &
                                                                            PlantExpData$TPM < max(NLR_data$TPM)),"Gene"], 
@@ -28,6 +29,7 @@ PlantExp <- function(normalised) {
       
       heterochromaticGenes <- append(heterochromaticGenes, sample(PlantExpData[which(PlantExpData$width > quantile(NLR_data$width, probs = n-.1) &
                                                                              PlantExpData$width <= quantile(NLR_data$width, probs = n) &
+                                                                             PlantExpData$Chromosomal.Region=="heterochromatic" &
                                                                              !(PlantExpData$Gene %in% heterochromaticGenes) &
                                                                              !(PlantExpData$Gene %in% NLR_data$Gene) &
                                                                              PlantExpData$TPM < max(NLR_data$TPM)),"Gene"], 

@@ -1,7 +1,7 @@
 source("Functions\\Overlaps functions.R")
 
-# Determine the proportion of each gene overlapping with a significant peak.
-proportionPerGeneFunction <- function (allOverlaps, nextflowOutput, genomicData, proportionPerGene, set) {
+# Determine the proportion of each R-gene promotor overlapping with a significant peak.
+promoterEnrichmentFunction <- function (allOverlaps, nextflowOutput, genomicData, promoterEnrichment, set) {
   
   proportionDF <- data.frame(Gene = character(),
                              `Mod.TF` = character(),
@@ -42,8 +42,54 @@ proportionPerGeneFunction <- function (allOverlaps, nextflowOutput, genomicData,
       }
     }
   } 
-  proportionPerGene[[set]] <- proportionDF
-  return(proportionPerGene)
+  promoterEnrichment[[set]] <- proportionDF
+  return(promoterEnrichment)
+}
+
+# Determine the proportion of each R-gene body overlapping with a significant peak.
+genebodyEnrichmentFunction <- function (allOverlaps, nextflowOutput, genomicData, genebodyEnrichment, set) {
+  
+  proportionDF <- data.frame(Gene = character(),
+                             `Mod.TF` = character(),
+                             Proportion = numeric())
+  
+  for (n in names(allOverlaps)) {
+    for (mod in unique(nextflowOutput[, "Mod.TF"])) {
+      peakWidths <- c()
+      
+      if (nrow(allOverlaps[[n]][[mod]]) >= 1) {
+        for (row in 1:nrow(allOverlaps[[n]][[mod]])) {
+          if (overlapsFunction(as.numeric(allOverlaps[[n]][[mod]][row,"start"]), as.numeric(allOverlaps[[n]][[mod]][row,"end"]),
+                               as.numeric(geneRegions[["Gene20"]][geneRegions[["Gene20"]]$Gene==n,"start"]),
+                               as.numeric(geneRegions[["Gene100"]][geneRegions[["Gene100"]]$Gene==n,"end"]))==TRUE) {
+            
+            peakWidths <- append(peakWidths, allOverlaps[[n]][[mod]][row,"width"])
+          } else peakWidths <- peakWidths
+        }
+        
+        if ((as.numeric(geneRegions[["Gene100"]][geneRegions[["Gene100"]]$Gene==n,"end"])-as.numeric(geneRegions[["Gene20"]][geneRegions[["Gene20"]]$Gene==n,"start"])) >= sum(peakWidths)) {
+          proportionDF <- rbind(proportionDF, data.frame(Gene = n,
+                                                         `Mod.TF` = mod,
+                                                         Proportion = sum(peakWidths)/(as.numeric(geneRegions[["Gene100"]][geneRegions[["Gene100"]]$Gene==n,"end"])-as.numeric(geneRegions[["Gene20"]][geneRegions[["Gene20"]]$Gene==n,"start"])),
+                                                         ExpressionLevel = str_match(set, "^R-gene (.*)$")[,2])) 
+          
+        } else if ((as.numeric(geneRegions[["Gene100"]][geneRegions[["Gene100"]]$Gene==n,"end"])-as.numeric(geneRegions[["Gene20"]][geneRegions[["Gene20"]]$Gene==n,"start"]))  < sum(peakWidths)) {
+          proportionDF <- rbind(proportionDF, data.frame(Gene = n,
+                                                         `Mod.TF` = mod,
+                                                         Proportion = 1,
+                                                         ExpressionLevel = str_match(set, "^R-gene (.*)$")[,2]))
+        }
+      }
+      else if (nrow(allOverlaps[[n]][[mod]]) < 1) {
+        proportionDF <- rbind(proportionDF, data.frame(Gene = n,
+                                                       `Mod.TF` = mod,
+                                                       Proportion = 0,
+                                                       ExpressionLevel = str_match(set, "^R-gene (.*)$")[,2]))
+      }
+    }
+  } 
+  genebodyEnrichment[[set]] <- proportionDF
+  return(genebodyEnrichment)
 }
 
 

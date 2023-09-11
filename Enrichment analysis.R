@@ -32,11 +32,13 @@ nextflowOutput <- data.frame()
 for (file in list.files(path = "Nextflow_backup", pattern = "Peaks.bed")) {
   # Rename file to include target modification/TF (if it has not been changed already).
   if (str_detect(file, "_") == FALSE) {
-    file.rename(paste("Nextflow_backup/", file, sep = ""), paste("Nextflow_backup/", ChIP_experiments[which(ChIP_experiments$Sample %in% str_match(file, "^(SRR.*)merged.*$")[,2]), "Modification/TF"],
-                                                                 "_", file, sep = "")) 
     
-    file <- paste(ChIP_experiments[which(ChIP_experiments$Sample %in% str_match(file, "^(SRR.*)merged.*$")[,2]), "Modification/TF"],
-                  "_", file, sep = "")
+    file.rename(paste("Nextflow_backup/", file, sep = ""), 
+                paste("Nextflow_backup/", ChIP_experiments[which(str_detect(ChIP_experiments$`Sample data`, str_match(file,"^(SRR.*)merged.*$")[,2])==TRUE), "Modification/TF"],
+                      "_", file, sep = "")) 
+      
+    file <- paste(ChIP_experiments[which(str_detect(ChIP_experiments$`Sample data`, str_match(file,"^(SRR.*)merged.*$")[,2])==TRUE), "Modification/TF"],
+                    "_", file, sep = "")
   }
   
   # Merge all broad and narrow peaks datasets.

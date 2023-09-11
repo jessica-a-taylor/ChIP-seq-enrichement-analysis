@@ -27,12 +27,13 @@ genomicData <- genomicData[,-1]
 sampleGenesProportionsPerRegion <- hash()
 
 # Create a hash for storing the proportion of each gene overlapping with a significant peak.
-proportionPerGene <- hash()
+promoterEnrichment <- hash()
+genebodyEnrichment <- hash()
 
 # Generate a list of the number of genes in each set.
 geneCount <- data.frame()
 
-for (set in names(sampleGenes)[3:4]) {
+for (set in names(sampleGenes)) {
     
   geneSet <- sampleGenes[[set]]
   
@@ -56,7 +57,8 @@ for (set in names(sampleGenes)[3:4]) {
   
   # Determine the proportion of each gene overlapping with a significant peak.
   if (set %in% c("R-gene Low Expression","R-gene No Expression")) {
-    proportionPerGene <- proportionPerGeneFunction(allOverlaps, nextflowOutput, genomicData, proportionPerGene, set)
+    promoterEnrichment <- promoterEnrichmentFunction(allOverlaps, nextflowOutput, genomicData, promoterEnrichment, set)
+    genebodyEnrichment <- genebodyEnrichmentFunction(allOverlaps, nextflowOutput, genomicData, genebodyEnrichment, set)
   }
   
   # Determine the proportion of each gene region overlapping with a significant peak.
@@ -76,10 +78,12 @@ for (set in names(sampleGenes)[3:4]) {
 }
 
 # Merge all data on the proportion of overlap per gene into a single dataframe.
-allProportionsPerGene <- data.frame()
+allPromoterEnrichment <- data.frame()
+allGenebodyEnrichment <- data.frame()
 
 for (set in names(proportionPerGene)) {
-  allProportionsPerGene <- rbind(allProportionsPerGene, proportionPerGene[[set]])
+  allPromoterEnrichment <- rbind(allPromoterEnrichment, promoterEnrichment[[set]])
+  allGenebodyEnrichment <- rbind(allGenebodyEnrichment, genebodyEnrichment[[set]])
 }
   
 # Merge all data on the proportion of overlap per gene region into a single dataframe.
@@ -108,10 +112,12 @@ geneFrequency <- geneRegionAxisLocations(geneFrequency, geneRegions)
 
 if (normalised == TRUE) {
   write.csv(geneFrequency, paste("PlantExp data\\Normalised\\allFrequencies.csv", sep = "")) 
-  write.csv(allProportionsPerGene, paste("PlantExp data\\Normalised\\allProportionsPerGene.csv", sep = "")) 
+  write.csv(allPromoterEnrichment, paste("PlantExp data\\Normalised\\promoterEnrichment.csv", sep = ""))
+  write.csv(allGenebodyEnrichment, paste("PlantExp data\\Normalised\\genebodyEnrichment.csv", sep = "")) 
   write.csv(allProportionsPerRegion, paste("PlantExp data\\Normalised\\allProportionsPerRegion.csv", sep = "")) 
 } else if (normalised == FALSE) {
   write.csv(geneFrequency, paste("PlantExp data\\Non-normalised\\allFrequencies.csv", sep = "")) 
-  write.csv(allProportionsPerGene, paste("PlantExp data\\Non-normalised\\allProportionsPerGene.csv", sep = "")) 
+  write.csv(allPromoterEnrichment, paste("PlantExp data\\Non-normalised\\promoterEnrichment.csv", sep = "")) 
+  write.csv(allGenebodyEnrichment, paste("PlantExp data\\Non-normalised\\genebodyEnrichment.csv", sep = "")) 
   write.csv(allProportionsPerRegion, paste("PlantExp data\\Non-normalised\\allProportionsPerRegion.csv", sep = "")) 
 }

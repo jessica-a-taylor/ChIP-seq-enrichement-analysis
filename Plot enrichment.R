@@ -12,18 +12,17 @@ axisText <- c("Intergenic", "Promotor \n(1kb)", "Promotor \n(500bp)", "TSS", "20
 
 if (normalised == TRUE) {
   allFrequencies <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allFrequencies.csv", sep = "")))
-  
+  promoterEnrichment <- data.frame(read_csv(paste("PlantExp data\\Normalised\\promoterEnrichment.csv", sep = "")))  
+  genebodyEnrichment <- data.frame(read_csv(paste("PlantExp data\\Normalised\\genebodyEnrichment.csv", sep = "")))
   allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allProportionsPerRegion.csv", sep = "")))  
   allProportionsPerRegion <- allProportionsPerRegion[,-1]
-
-  allProportionsPerGene <- data.frame(read_csv(paste("PlantExp data\\Normalised\\allProportionsPerGene.csv", sep = "")))  
+  
 } else if (normalised == FALSE) {
   allFrequencies <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allFrequencies.csv", sep = "")))
-  
-  allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allProportionsPerRegion.csv", sep = "")))
-  
-  allProportionsPerGene <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allProportionsPerGene.csv", sep = "")))  
-  
+  promoterEnrichment <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\promoterEnrichment.csv", sep = "")))  
+  genebodyEnrichment <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\genebodyEnrichment.csv", sep = "")))
+  allProportionsPerRegion <- data.frame(read_csv(paste("PlantExp data\\Non-normalised\\allProportionsPerRegion.csv", sep = "")))  
+  allProportionsPerRegion <- allProportionsPerRegion[,-1]
 }
   
 # Replace comma in 'Comparisons' column with \n.
@@ -85,10 +84,10 @@ for (mod in unique(allProportionsPerRegion$Mod.TF)) {
   ggsave(paste("Graphs\\Normalised\\Enrichment per region\\", mod, ".png", sep = ""), plot = plot, width = 10, height = 4)  
 }
 
-# Plot bar graph of enrichment per gene.
-for (level in unique(allProportionsPerGene$ExpressionLevel)) {
-  df <- allProportionsPerGene[allProportionsPerGene$ExpressionLevel==level,]
-  df <- df[which(df$Mod.TF %in% c("H3K4me3", "H3K36me3", "H3K9ac", "H3K27ac", "H3K27me3", "H2A.Z", "H2Bub", "H2AK121ub", "H3K4me1")),]
+# Plot bar graph of enrichment per R-gene promoter.
+for (level in unique(promoterEnrichment$ExpressionLevel)) {
+  df <- promoterEnrichment[promoterEnrichment$ExpressionLevel==level,]
+  df <- df[which(df$Mod.TF %in% c("H3K4me3", "H3K36me3", "H3K9ac", "H3K27ac", "H3K27me3", "H2A.Z", "H2Bub", "H2AK121ub", "H3K4me1", "H3K9me2")),]
   
   plot <- ggplot(df, aes(Mod.TF, Gene)) +
     geom_tile(aes(fill = Proportion), colour = "white") +
@@ -100,9 +99,9 @@ for (level in unique(allProportionsPerGene$ExpressionLevel)) {
           legend.text = element_text(size = 12),
           legend.title = element_text(size = 14)) 
 
-  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level,"promotor epigenetic enrichment.png", sep = ""), plot = plot, width = 14, height = 16)
+  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level,"promotor epigenetic enrichment.png", sep = ""), plot = plot, width = 16, height = 16)
   
-  df <- allProportionsPerGene[allProportionsPerGene$ExpressionLevel==level,]
+  df <- promoterEnrichment[promoterEnrichment$ExpressionLevel==level,]
   df <- df[which(df$Mod.TF %in% c("WRKY18", "WRKY33", "WRKY40", "VAL1", "VAL2", "TPR1", "ATXR7", "HDA9", "REF6", "EDM2",
                                   "LPH1", "SPTL6", "GBPL3", "CCA1", "TOC1", "LHY", "NUP1", "CRWN1")),]
   
@@ -117,4 +116,38 @@ for (level in unique(allProportionsPerGene$ExpressionLevel)) {
           legend.title = element_text(size = 14)) 
 
   ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level, "promotor TF enrichment.png", sep = ""), plot = plot, width = 16, height = 16)
+}
+
+# Plot bar graph of enrichment per R-gene body
+for (level in unique(genebodyEnrichment$ExpressionLevel)) {
+  df <- genebodyEnrichment[genebodyEnrichment$ExpressionLevel==level,]
+  df <- df[which(df$Mod.TF %in% c("H3K4me3", "H3K36me3", "H3K9ac", "H3K27ac", "H3K27me3", "H2A.Z", "H2Bub", "H2AK121ub", "H3K4me1", "H3K9me2")),]
+  
+  plot <- ggplot(df, aes(Mod.TF, Gene)) +
+    geom_tile(aes(fill = Proportion), colour = "white") +
+    scale_fill_gradient(low = "white", high = "indianred2") +
+    labs(x = "Histone modification", y = "Gene", fill = "Enrichment") +
+    theme(axis.text.y = element_text(size = 11, colour = "grey13"),
+          axis.text.x = element_text(size = 13, colour = "grey13"),
+          axis.title = element_text(size = 16),
+          legend.text = element_text(size = 12),
+          legend.title = element_text(size = 14)) 
+  
+  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level,"genebody epigenetic enrichment.png", sep = ""), plot = plot, width = 16, height = 16)
+  
+  df <- genebodyEnrichment[genebodyEnrichment$ExpressionLevel==level,]
+  df <- df[which(df$Mod.TF %in% c("WRKY18", "WRKY33", "WRKY40", "VAL1", "VAL2", "TPR1", "ATXR7", "HDA9", "REF6", "EDM2",
+                                  "LPH1", "SPTL6", "GBPL3", "CCA1", "TOC1", "LHY", "NUP1", "CRWN1")),]
+  
+  plot <- ggplot(df, aes(Mod.TF, Gene)) +
+    geom_tile(aes(fill = Proportion), colour = "white") +
+    scale_fill_gradient(low = "white", high = "indianred2") +
+    labs(x = "Histone modification", y = "Gene", fill = "Enrichment") +
+    theme(axis.text.y = element_text(size = 11, colour = "grey13"),
+          axis.text.x = element_text(size = 13, colour = "grey13"),
+          axis.title = element_text(size = 16),
+          legend.text = element_text(size = 12),
+          legend.title = element_text(size = 14)) 
+  
+  ggsave(paste("Graphs\\Normalised\\Enrichment per gene\\",level, "genebody TF enrichment.png", sep = ""), plot = plot, width = 16, height = 16)
 }
