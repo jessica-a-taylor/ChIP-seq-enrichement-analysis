@@ -3,14 +3,14 @@ library(sets)
 
 source("Functions\\Overlaps functions.R")
 
-# Function for creating a hash containing the significant peaks in each gene. 
-
+# Filter for the ChIP-seq peaks overlapping each gene. 
 PeaksPerGene <- function(geneSet, data) {
   
   allPeaks <- hash()
   
   if (nrow(geneSet) >= 1) {
     for (row in 1:nrow(geneSet)) {
+      
       # Select rows that are within the range of each gene and on the same chromosome.
       selectedRows <- c(which(data[,"start"] > geneSet[row, "start"]-5000 & data[,"end"] < geneSet[row, "end"]+5000 & data[,"seqnames"] == as.numeric(geneSet[row, "seqnames"])))
       allPeaks[[geneSet[row,"Gene"]]] <- data[selectedRows,]
@@ -33,21 +33,6 @@ peakOccurrences <- function(allPeaks, data) {
       peakHash[[mod]] <- allPeaks[[n]][which(allPeaks[[n]][, "Mod.TF"]==mod),]
     }
     genePeaks[[n]] <- peakHash
-  }
-  
-  # Merge start and end coordinates columns to create a ranges column.
-  source("Functions\\Get range - merge gene coordinates.R")
-  
-  for (n in names(genePeaks)) {
-    for (mod in unique(data[, "Mod.TF"])) {
-      
-      if (nrow(genePeaks[[n]][[mod]]) >= 1) {
-        geneSet <- genePeaks[[n]][[mod]]
-        
-        genePeaks[[n]][[mod]]$ranges <- mergeCoordinates(geneSet)
-      }
-      else next
-    }
   }
   return(genePeaks)
 }

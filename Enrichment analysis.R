@@ -51,6 +51,9 @@ for (file in list.files(path = "Nextflow_backup", pattern = "Peaks.bed")) {
   nextflowOutput <- rbind(nextflowOutput, data)
 }
 
+# Remove rows for peaks on mitochondrial/chloroplast genome.
+nextflowOutput <- nextflowOutput[-which(nextflowOutput$seqnames %in% c("ChrC", "ChrM")),]
+
 # Change format of 'seqnames' column.
 nextflowOutput$seqnames <- str_match(nextflowOutput[,"seqnames"], "^Chr(.)$")[,-1]
 
