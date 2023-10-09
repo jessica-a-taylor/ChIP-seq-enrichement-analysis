@@ -1,4 +1,4 @@
-overlappingPeaksFunction <- function(geneRegions, allModifications, allRegions, peaksPerGene, allPeaks, gene) {
+overlappingPeaksFunction <- function(geneRegions, allModifications, allRegions, peaksPerGene, allPeaks, gene, set) {
 
   # Initialise an empty hash of dataframes.
   overlappingPeaks <- hash()
@@ -99,7 +99,8 @@ overlappingPeaksFunction <- function(geneRegions, allModifications, allRegions, 
                                                                 width = end - start,
                                                                 ranges = paste(start, "-", end, sep = ""),
                                                                 region = region,
-                                                                `Mod.TF` = mod))
+                                                                `Mod.TF` = mod,
+                                                                GeneSet = set))
         }
       }
       else next

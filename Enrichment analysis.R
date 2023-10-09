@@ -30,6 +30,7 @@ ChIP_experiments <- as.data.frame(read_xlsx("Nextflow_backup/ChIP experiment SRA
 nextflowOutput <- data.frame()
 
 for (file in list.files(path = "Nextflow_backup", pattern = "Peaks.bed")) {
+  
   # Rename file to include target modification/TF (if it has not been changed already).
   if (str_detect(file, "_") == FALSE) {
     
@@ -90,11 +91,11 @@ rm(focusModification, data, file, mod, row)
 # Ensure that the number of R-genes and control genes is the same for a particular expression level.
 source("Functions\\PlantExp.R")
 
-normalised <- TRUE
 sampleGenes <- PlantExp(normalised)
   
 # Plot average gene size between R-genes and control genes.
 geneWidth <- data.frame()
+
 for (set in names(sampleGenes)) {
   geneWidth <- rbind(geneWidth, data.frame(Gene = sampleGenes[[set]]$Gene,
                                            GeneSet = sampleGenes[[set]]$GeneSet,
@@ -106,13 +107,9 @@ plot <- ggplot(geneWidth, aes(x = GeneSet, y = GeneWidth)) +
   stat_compare_means(label = "p.signif", method = "wilcox.test",
                      ref.group = "R-gene") + theme_bw()
 
-if (normalised == TRUE) {
-  write.csv(geneWidth, paste("PlantExp data\\Normalised\\geneWidth.csv", sep = "")) 
-  ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
-} else if (normalised == FALSE) {
-  write.csv(geneWidth, paste("PlantExp data\\Non-normalised\\geneWidth.csv", sep = "")) 
-  ggsave("Graphs\\Non-normalised\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
-}
+write.csv(geneWidth, paste("PlantExp data\\geneWidth.csv", sep = "")) 
+ggsave("Graphs\\Gene width comparison.png", plot = plot, width = 8, height = 4)  
+
 
 # Perform enrichment analysis.
 jobRunScript("Script for analysis.R", importEnv = TRUE)

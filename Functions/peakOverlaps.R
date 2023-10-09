@@ -1,4 +1,4 @@
-peakOverlaps <- function(geneSet, geneRegions, nextflowOutput) {
+peakOverlaps <- function(geneSet, geneRegions, nextflowOutput, set) {
   source("Functions\\overlappingPeaksFunction.R")
   
   allPeaks <- hash()
@@ -25,7 +25,7 @@ peakOverlaps <- function(geneSet, geneRegions, nextflowOutput) {
                                            as.numeric(nextflowOutput[, "seqnames"]) == as.numeric(df[1, "seqnames"])),]
     
     # Function to get the peaks for each modification overlapping each gene region.
-    allPeaks <- overlappingPeaksFunction(geneRegions, allModifications, allRegions, peaksPerGene, allPeaks, gene)
+    allPeaks <- overlappingPeaksFunction(geneRegions, allModifications, allRegions, peaksPerGene, allPeaks, gene, set)
   }
   return(allPeaks)
 }
