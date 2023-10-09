@@ -8,8 +8,10 @@ if (nrow(geneSet) >= 1) {
   for (row in 1:nrow(geneSet)) {
     
     # Select rows that are within the range of each gene and on the same chromosome.
-    selectedRows <- c(which(nextflowOutput[,"start"] > geneSet[row, "start"]-5000 & nextflowOutput[,"end"] < geneSet[row, "end"]+5000 & nextflowOutput[,"seqnames"] == as.numeric(geneSet[row, "seqnames"])))
-    allPeaks[[geneSet[row,"Gene"]]] <- nextflowOutput[selectedRows,]
+    allPeaks[[geneSet[row,"Gene"]]] <- nextflowOutput[c(which(nextflowOutput[,"start"] > geneSet[row, "start"]-5000 & 
+                              nextflowOutput[,"end"] < geneSet[row, "end"]+5000 & 
+                              nextflowOutput[,"seqnames"] == as.numeric(geneSet[row, "seqnames"]))),]
+    
   }
 }
 return(allPeaks)
@@ -97,11 +99,13 @@ for (n in names(allOverlaps)) {
   }
 }
   
+testData <- data.frame()
   
 # Create dataframes with the information needed in the bed file.
 for (n in names(genePeaks)) {
   for (mod in unique(nextflowOutput[, "Mod.TF"])) {
-    df <- data.frame(seqnames = numeric(),
+    df <- data.frame(Gene = character(),
+                     seqnames = numeric(),
                      start = numeric(),
                      end = numeric(),
                      width = numeric(),
@@ -110,7 +114,8 @@ for (n in names(genePeaks)) {
     
     if (length(allOverlaps[[n]][[mod]])>0) {
       for (l in 1:length(allOverlaps[[n]][[mod]])) {
-        df <- rbind(df, data.frame(seqnames = genePeaks[[n]][[mod]][1,"seqnames"],
+        df <- rbind(df, data.frame(Gene = n,
+                                   seqnames = genePeaks[[n]][[mod]][1,"seqnames"],
                                    start = str_match(allOverlaps[[n]][[mod]][[l]], "^([0-9]+)-([0-9]+)$")[,2],
                                    end = str_match(allOverlaps[[n]][[mod]][[l]], "^([0-9]+)-([0-9]+)$")[,3],
                                    width = as.numeric(str_match(allOverlaps[[n]][[mod]][[l]], "^([0-9]+)-([0-9]+)$")[,3]) - as.numeric(str_match(allOverlaps[[n]][[mod]][[l]], "^([0-9]+)-([0-9]+)$")[,2]),
@@ -119,7 +124,8 @@ for (n in names(genePeaks)) {
       }
     }
     allOverlaps[[n]][[mod]] <- df
+    testData <- rbind(testData, df)
   }
 }
 
-print(allOverlaps[[n]][["H3K4me3"]])
+write.csv(testData, file = "OldMergedPeaks.csv")
