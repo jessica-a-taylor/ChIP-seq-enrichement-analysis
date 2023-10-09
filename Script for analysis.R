@@ -4,6 +4,7 @@ library(rtracklayer)
 library(dplyr)
 library(stringr)
 library(hash)
+library(sets)
 library(TxDb.Athaliana.BioMart.plantsmart28)
 library(data.table)
 library(grid)
@@ -13,7 +14,7 @@ library(ggplot2)
 library(ggpubr)
 
 source("Functions\\Overlaps functions.R")
-source("Functions\\Peaks per gene.R")
+source("Functions\\peakOverlaps.R")
 source("Functions\\Coordinates per gene region.R")
 source("Functions\\Proportion of overlap functions.R")
 source("Functions\\Get range - merge gene coordinates.R")
@@ -24,11 +25,7 @@ genomicData <- as.data.frame(read_csv("Protein coding genes.csv"))
 genomicData <- genomicData[,-1]
 
 # Create a hash for storing the proportion of each gene region overlapping with a significant peak.
-sampleGenesProportionsPerRegion <- hash()
-
-# Create a hash for storing the proportion of each gene overlapping with a significant peak.
-promoterEnrichment <- hash()
-genebodyEnrichment <- hash()
+proportionOfOverlap <- hash()
 
 # Generate a list of the number of genes in each set.
 geneCount <- data.frame()
@@ -40,39 +37,25 @@ for (set in names(sampleGenes)) {
   # Get the coordinates for each genomic region.
   geneRegions <- getGeneCoordinates(geneSet, genomicData)
 
-  # Create a hash containing the significant peaks in each gene. 
-  allPeaks <- PeaksPerGene(geneSet, nextflowOutput)
-  
-  # Create a hash containing hashes with the coordinates of significant peaks from each experiment for each gene.
-  genePeaks <- peakOccurrences(allPeaks, nextflowOutput)
-  
-  rm(allPeaks)
-  
-  # For each gene in the current set of genes, merge overlapping peaks.
-  allOverlaps <- mergeOverlappingPeaks(genePeaks, nextflowOutput)
+  # For each modification/TF, get the peaks overlapping each gene region.
+  allPeaks <- peakOverlaps(geneSet, geneRegions, nextflowOutput)
   
   geneCount <- rbind(geneCount, data.frame(GeneSet = set,
-                                           GeneCount = length(names(allOverlaps))))
-  rm(genePeaks)
-  
-  # Determine the proportion of each gene overlapping with a significant peak.
-  if (set %in% c("R-gene Low Expression","R-gene No Expression")) {
-    promoterEnrichment <- promoterEnrichmentFunction(allOverlaps, nextflowOutput, genomicData, promoterEnrichment, set)
-    genebodyEnrichment <- genebodyEnrichmentFunction(allOverlaps, nextflowOutput, genomicData, genebodyEnrichment, set)
-  }
+                                           GeneCount = length(names(allPeaks))))
+
   
   # Determine the proportion of each gene region overlapping with a significant peak.
-  proportionPerRegion <- proportionPerRegionFunction(geneRegions, allOverlaps, nextflowOutput)
+  proportion <- proportionFunction(geneRegions, allPeaks, nextflowOutput)
   
-  # Add a column to 'proportionPerRegion' with the numbers for 
+  # Add a column to 'proportion' with the numbers for 
   # each gene region that will correspond with their position on the x axis.
-  proportionPerRegion <- geneRegionAxisLocations(proportionPerRegion, geneRegions)
+  proportion <- geneRegionAxisLocations(proportion, geneRegions)
   
-  # Add a column to 'proportionPerRegion' identifying the gene set.
-  proportionPerRegion <- expressionColumn(proportionPerRegion, set)
+  # Add a column to 'proportion' identifying the gene set.
+  proportion <- expressionColumn(proportion, set)
   
-  # Store final results in 'sampleGenesProportionsPerRegion'.
-  sampleGenesProportionsPerRegion[[set]] <- proportionPerRegion
+  # Store final results in 'proportionOfOverlap'.
+  proportionOfOverlap[[set]] <- proportion
   
   print(set)
 }

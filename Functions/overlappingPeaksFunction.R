@@ -1,6 +1,5 @@
 overlappingPeaksFunction <- function(geneRegions, allModifications, allRegions, peaksPerGene, allPeaks, gene) {
-  source("Overlaps functions.R")
-  
+
   # Initialise an empty hash of dataframes.
   overlappingPeaks <- hash()
 

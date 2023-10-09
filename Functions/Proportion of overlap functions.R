@@ -1,5 +1,3 @@
-source("Functions\\Overlaps functions.R")
-
 # Determine the proportion of each R-gene promotor overlapping with a significant peak.
 promoterEnrichmentFunction <- function (allOverlaps, nextflowOutput, genomicData, promoterEnrichment, set) {
   
@@ -94,50 +92,37 @@ genebodyEnrichmentFunction <- function (allOverlaps, nextflowOutput, genomicData
 
 
 # Determine the proportion of each gene region overlapping with a significant peak.
-proportionPerRegionFunction <- function (geneRegions, allOverlaps, nextflowOutput) {
-
-  proportionPerRegion <- hash()
+proportionFunction <- function (geneRegions, allPeaks, nextflowOutput) {
   
-  for (r in names(geneRegions)) {
-    proportionDF <- data.frame(Gene = character(),
-                               Region= character(), 
-                               `Mod.TF` = character(),
-                               Proportion = numeric())
-    
-    if (length(names(allOverlaps)) >= 1) {
-      for (mod in unique(nextflowOutput[, "Mod.TF"])) {
+  proportion <- hash()
+  
+  allModifications <- unique(nextflowOutput$Mod.TF)
+  allRegions <- names(geneRegions)
+
+  for (gene in names(allPeaks)) {
+    for (region in allRegions) {
+      for (mod in allModifications) {
+
+        proportion[[gene]][[region]][[mod]] <- data.frame()
         
-        for (n in names(allOverlaps)) {
-          
+        if (nrow(allPeaks[[gene]][[region]][[mod]]) >= 1) {
           peakOverlaps <- c()
           
-          if (nrow(allOverlaps[[n]][[mod]]) >= 1 & n %in% geneRegions[[r]]$Gene == TRUE) {
-            
-            for (row in 1:nrow(allOverlaps[[n]][[mod]])) {
-              peakOverlaps <- append(peakOverlaps, newOverlapsFunction(as.numeric(allOverlaps[[n]][[mod]][row, "start"]), as.numeric(allOverlaps[[n]][[mod]][row, "end"]),
-                                                                     as.numeric(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$start), as.numeric(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$end)))
-            }
-            proportionDF <- rbind(proportionDF, data.frame(Gene = n,
-                                                             Region = r,
-                                                             `Mod.TF` = mod,
-                                                             Proportion = sum(peakOverlaps)/(geneRegions[[r]][geneRegions[[r]]$Gene==n,]$width)))
+          for (row in 1:nrow(allPeaks[[gene]][[region]][[mod]])) {
+            peakOverlaps <- append(peakOverlaps, newOverlapsFunction(as.numeric(allPeaks[[gene]][[region]][[mod]][row, "start"]), 
+                                                                     as.numeric(allPeaks[[gene]][[region]][[mod]][row, "end"]),
+                                                                     as.numeric(geneRegions[[region]][[gene]]$start),
+                                                                     as.numeric(geneRegions[[region]][[gene]]$end)))
           }
-          else proportionDF <- rbind(proportionDF, data.frame(Gene = n,
-                                                              Region = r,
-                                                              `Mod.TF` = mod,
-                                                              Proportion = 0))
+          proportion[[gene]][[region]][[mod]] <- rbind(proportion[[gene]][[region]][[mod]], 
+                                                       data.frame(Gene = gene,
+                                                                  Region = region,
+                                                                  `Mod.TF` = mod,
+                                                                  Proportion = sum(peakOverlaps)/(as.numeric(geneRegions[[region]][[gene]]$width))))
         }
+        else proportion[[gene]][[region]][[mod]] <- proportion[[gene]][[region]][[mod]]
       }
-    } else proportionDF <- proportionDF
-    
-    proportionPerRegion[[r]] <- proportionDF
+    }
   }
-  
-  # Collect all hashes into a single dataframe.
-  DF <- data.frame()
-  
-  for (r in names(geneRegions)) {
-    DF <- rbind(DF, proportionPerRegion[[r]])
-  }
-  return(DF)
+  return(proportion)
 }
