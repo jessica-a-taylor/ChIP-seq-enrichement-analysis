@@ -57,7 +57,7 @@ for (set in names(sampleGenes)) {
 }
   
 # Merge all data on the proportion of overlap per gene region into a single dataframe.
-allProportionsPerRegion <- data.frame()
+allProportions <- data.frame()
 
 for (set in names(proportionOfOverlap)) {
   allProportions <- rbind(allProportions, proportionOfOverlap[[set]])

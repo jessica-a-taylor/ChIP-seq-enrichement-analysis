@@ -11,39 +11,35 @@ PlantExp <- function(normalised) {
   NLR_data$GeneSet <- rep("R-gene", times = nrow(NLR_data))
   
   # Sample 1000 random genes with a gene length distribution equal to that of the R-genes.
-  if (normalised == TRUE) {
-    euchromaticGenes <- c()
-    heterochromaticGenes <- c()
+  euchromaticGenes <- c()
+  heterochromaticGenes <- c()
+  
+  for (n in seq(from = .1, to = 1, by = .1)) {
+    euchromaticGenes <- append(euchromaticGenes, sample(PlantExpData[which(PlantExpData$width > quantile(NLR_data$width, probs = n-.1) &
+                                                                        PlantExpData$width <= quantile(NLR_data$width, probs = n) &
+                                                                        PlantExpData$Chromosomal.Region=="euchromatic" &
+                                                                        !(PlantExpData$Gene %in% euchromaticGenes) &
+                                                                        !(PlantExpData$Gene %in% NLR_data$Gene) &
+                                                                         PlantExpData$TPM < max(NLR_data$TPM)),"Gene"], 
+                                                    100*(nrow(NLR_data[which(NLR_data$width > quantile(NLR_data$width, probs = n-.1) &
+                                                                             NLR_data$width <= quantile(NLR_data$width, probs = n) &
+                                                                             NLR_data$Chromosomal.Region=="euchromatic"),])/nrow(NLR_data[which(NLR_data$width > quantile(NLR_data$width, probs = n-.1) &
+                                                                                                                                                 NLR_data$width <= quantile(NLR_data$width, probs = n)),]))))
     
-    for (n in seq(from = .1, to = 1, by = .1)) {
-      euchromaticGenes <- append(euchromaticGenes, sample(PlantExpData[which(PlantExpData$width > quantile(NLR_data$width, probs = n-.1) &
-                                                                          PlantExpData$width <= quantile(NLR_data$width, probs = n) &
-                                                                          PlantExpData$Chromosomal.Region=="euchromatic" &
-                                                                          !(PlantExpData$Gene %in% euchromaticGenes) &
-                                                                          !(PlantExpData$Gene %in% NLR_data$Gene) &
+    heterochromaticGenes <- append(heterochromaticGenes, sample(PlantExpData[which(PlantExpData$width > quantile(NLR_data$width, probs = n-.1) &
+                                                                           PlantExpData$width <= quantile(NLR_data$width, probs = n) &
+                                                                           PlantExpData$Chromosomal.Region=="heterochromatic" &
+                                                                           !(PlantExpData$Gene %in% heterochromaticGenes) &
+                                                                           !(PlantExpData$Gene %in% NLR_data$Gene) &
                                                                            PlantExpData$TPM < max(NLR_data$TPM)),"Gene"], 
                                                       100*(nrow(NLR_data[which(NLR_data$width > quantile(NLR_data$width, probs = n-.1) &
                                                                                NLR_data$width <= quantile(NLR_data$width, probs = n) &
-                                                                               NLR_data$Chromosomal.Region=="euchromatic"),])/nrow(NLR_data[which(NLR_data$width > quantile(NLR_data$width, probs = n-.1) &
-                                                                                                                                                   NLR_data$width <= quantile(NLR_data$width, probs = n)),]))))
-      
-      heterochromaticGenes <- append(heterochromaticGenes, sample(PlantExpData[which(PlantExpData$width > quantile(NLR_data$width, probs = n-.1) &
-                                                                             PlantExpData$width <= quantile(NLR_data$width, probs = n) &
-                                                                             PlantExpData$Chromosomal.Region=="heterochromatic" &
-                                                                             !(PlantExpData$Gene %in% heterochromaticGenes) &
-                                                                             !(PlantExpData$Gene %in% NLR_data$Gene) &
-                                                                             PlantExpData$TPM < max(NLR_data$TPM)),"Gene"], 
-                                                        100*(nrow(NLR_data[which(NLR_data$width > quantile(NLR_data$width, probs = n-.1) &
-                                                                                 NLR_data$width <= quantile(NLR_data$width, probs = n) &
-                                                                                 NLR_data$Chromosomal.Region=="heterochromatic"),])/nrow(NLR_data[which(NLR_data$width > quantile(NLR_data$width, probs = n-.1) &
-                                                                                                                                                         NLR_data$width <= quantile(NLR_data$width, probs = n)),]))))
-      
-    }
-    control_data <- PlantExpData[which(PlantExpData$Gene %in% c(euchromaticGenes, heterochromaticGenes)),]
+                                                                               NLR_data$Chromosomal.Region=="heterochromatic"),])/nrow(NLR_data[which(NLR_data$width > quantile(NLR_data$width, probs = n-.1) &
+                                                                                                                                                       NLR_data$width <= quantile(NLR_data$width, probs = n)),]))))
     
-  } else if (normalised == FALSE) {
-    control_data <- PlantExpData[sample(nrow(PlantExpData(which(PlantExpData$TPM < max(NLR_data$TPM)))), 1000),]
   }
+  control_data <- PlantExpData[which(PlantExpData$Gene %in% c(euchromaticGenes, heterochromaticGenes)),]
+  
 
   control_data$GeneSet <- rep("Control gene", times = nrow(control_data))
   

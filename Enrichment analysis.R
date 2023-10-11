@@ -91,7 +91,7 @@ rm(focusModification, data, file, mod, row)
 # Ensure that the number of R-genes and control genes is the same for a particular expression level.
 source("Functions\\PlantExp.R")
 
-sampleGenes <- PlantExp(normalised)
+sampleGenes <- PlantExp()
   
 # Plot average gene size between R-genes and control genes.
 geneWidth <- data.frame()
