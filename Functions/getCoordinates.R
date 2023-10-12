@@ -209,7 +209,7 @@ downstreamCoordinatesFunction <- function(dataToUse) {
                                  current_negative = 
                                    list(getCoordinates = function(data) {
                                      data$start <- data$start - 200
-                                     data$end <- data$start
+                                     data$end <- data$start + 200
                                      data$width <- data$end - data$start
                                      data$ranges <- paste(data$start, "-", data$end, sep = "")
                                      return(data)}))

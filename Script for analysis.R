@@ -60,7 +60,13 @@ for (set in names(sampleGenes)) {
 allProportions <- data.frame()
 
 for (set in names(proportionOfOverlap)) {
-  allProportions <- rbind(allProportions, proportionOfOverlap[[set]])
+  for (gene in names(proportionOfOverlap[[set]])) {
+    for (region in names(proportionOfOverlap[[set]][[gene]])) {
+      for (mod in names(proportionOfOverlap[[set]][[gene]][[region]])) {
+        allProportions <- rbind(allProportions, proportionOfOverlap[[set]][[gene]][[region]][[mod]])
+      }
+    }
+  }
 }
 
 #write.csv(geneFrequency, paste("PlantExp data\\allFrequencies.csv", sep = "")) 
