@@ -142,7 +142,7 @@ promotorCoordinatesFunction <- function(dataToUse, region) {
                                    list(current_positive = 
                                           list(getCoordinates = function(data) {
                                             data$start <- data$start-500
-                                            data$end <- data$start
+                                            data$end <- data$start+500
                                             data$width <- data$end - data$start
                                             data$ranges <- paste(data$start, "-", data$end, sep = "")
                                             return(data)}),
@@ -159,7 +159,7 @@ promotorCoordinatesFunction <- function(dataToUse, region) {
                                    list(current_positive = 
                                           list(getCoordinates = function(data) {
                                             data$start <- data$start-1000
-                                            data$end <- data$start
+                                            data$end <- data$start+1000
                                             data$width <- data$end - data$start
                                             data$ranges <- paste(data$start, "-", data$end, sep = "")
                                             return(data)}),
