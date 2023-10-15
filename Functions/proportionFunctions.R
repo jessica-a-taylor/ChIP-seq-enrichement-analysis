@@ -98,29 +98,31 @@ proportionFunction <- function (geneRegions, allPeaks, nextflowOutput) {
   
   allModifications <- unique(nextflowOutput$Mod.TF)
   allRegions <- names(geneRegions)
-
-  for (gene in names(allPeaks)) {
-    for (region in allRegions) {
-      for (mod in allModifications) {
-
-        proportion[[gene]][[region]][[mod]] <- data.frame()
+  
+  for (mod in allModifications) {
+    for (gene in names(allPeaks[[mod]])) {
+      for (region in allRegions) {
         
-        if (nrow(allPeaks[[gene]][[region]][[mod]]) >= 1) {
+        proportion[[mod]][[gene]][[region]] <- data.frame()
+       
+        if (nrow(allPeaks[[mod]][[gene]][[region]]) >= 1) {
           peakOverlaps <- c()
           
-          for (row in 1:nrow(allPeaks[[gene]][[region]][[mod]])) {
-            peakOverlaps <- append(peakOverlaps, newOverlapsFunction(as.numeric(allPeaks[[gene]][[region]][[mod]][row, "start"]), 
-                                                                     as.numeric(allPeaks[[gene]][[region]][[mod]][row, "end"]),
+          for (row in 1:nrow(allPeaks[[mod]][[gene]][[region]])) {
+            peakOverlaps <- append(peakOverlaps, newOverlapsFunction(as.numeric(allPeaks[[mod]][[gene]][[region]][row, "start"]), 
+                                                                     as.numeric(allPeaks[[mod]][[gene]][[region]][row, "end"]),
                                                                      as.numeric(geneRegions[[region]][[gene]]$start),
                                                                      as.numeric(geneRegions[[region]][[gene]]$end)))
           }
-          proportion[[gene]][[region]][[mod]] <- rbind(proportion[[gene]][[region]][[mod]], 
+          proportion[[mod]][[gene]][[region]] <- rbind(proportion[[mod]][[gene]][[region]], 
                                                        data.frame(Gene = gene,
                                                                   Region = region,
                                                                   `Mod.TF` = mod,
                                                                   Proportion = sum(peakOverlaps)/(as.numeric(geneRegions[[region]][[gene]]$width))))
         }
-        else proportion[[gene]][[region]][[mod]] <- proportion[[gene]][[region]][[mod]]
+        else if (nrow(allPeaks[[mod]][[gene]][[region]]) < 1) {
+          proportion[[mod]][[gene]][[region]] <- proportion[[mod]][[gene]][[region]]
+        } 
       }
     }
   }

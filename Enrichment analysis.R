@@ -16,6 +16,7 @@ library(ggpubr)
 library(rstatix)
 library(tidyverse)
 library(glue)
+library(TxDb.Athaliana.BioMart.plantsmart28)
 
 # Enrichment analysis based on the occurrence of significant peaks.
 setwd("C:/Users/jexy2/OneDrive/ChIP-seq-enrichment-analysis")

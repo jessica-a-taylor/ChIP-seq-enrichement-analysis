@@ -1,18 +1,3 @@
-library(readxl)
-library(karyoploteR)
-library(rtracklayer)
-library(dplyr)
-library(stringr)
-library(hash)
-library(sets)
-library(TxDb.Athaliana.BioMart.plantsmart28)
-library(data.table)
-library(grid)
-library(readr)
-library(rstudioapi)
-library(ggplot2)
-library(ggpubr)
-
 source("Functions\\Coordinates per gene region.R")
 source("Functions\\Get range - merge gene coordinates.R")
 source("Functions\\Overlaps functions.R")
@@ -30,6 +15,8 @@ proportionOfOverlap <- hash()
 geneCount <- data.frame()
 
 for (set in names(sampleGenes)) {
+  
+  wb <- createWorkbook()
     
   geneSet <- sampleGenes[[set]]
   
@@ -48,26 +35,12 @@ for (set in names(sampleGenes)) {
   
   # Add a column to 'proportion' with the numbers for 
   # each gene region that will correspond with their position on the x axis.
-  proportion <- geneRegionAxisLocations(proportion, geneRegions)
+  wb <- geneRegionAxisLocations(proportion, geneRegions, wb)
   
   # Store final results in 'proportionOfOverlap'.
-  proportionOfOverlap[[set]] <- proportion
+  #proportionOfOverlap[[set]] <- proportion
   
   print(set)
-}
   
-# Merge all data on the proportion of overlap per gene region into a single dataframe.
-allProportions <- data.frame()
-
-for (set in names(proportionOfOverlap)) {
-  for (gene in names(proportionOfOverlap[[set]])) {
-    for (region in names(proportionOfOverlap[[set]][[gene]])) {
-      for (mod in names(proportionOfOverlap[[set]][[gene]][[region]])) {
-        allProportions <- rbind(allProportions, proportionOfOverlap[[set]][[gene]][[region]][[mod]])
-      }
-    }
-  }
+  saveWorkbook(wb, paste(set, ".xlsx", sep = ""), overwrite = TRUE)
 }
-
-#write.csv(geneFrequency, paste("PlantExp data\\allFrequencies.csv", sep = "")) 
-write.csv(allProportions, paste("PlantExp data\\allProportions.csv", sep = "")) 

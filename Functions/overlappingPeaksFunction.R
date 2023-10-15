@@ -9,8 +9,8 @@ overlappingPeaksFunction <- function(geneRegions, allModifications, allRegions, 
     peaksPerModification <- peaksPerGene[peaksPerGene$Mod.TF == mod,]
 
     for (region in names(geneRegions)) {
-      overlappingPeaks[[gene]][[region]][[mod]] <- data.frame()
-      allPeaks[[gene]][[region]][[mod]] <- data.frame()
+      overlappingPeaks[[mod]][[gene]][[region]] <- data.frame()
+      allPeaks[[mod]][[gene]][[region]] <- data.frame()
     }
     
     # Populate the hash
@@ -27,7 +27,7 @@ overlappingPeaksFunction <- function(geneRegions, allModifications, allRegions, 
           if (overlapsFunction(peaksPerModification[row, "start"], peaksPerModification[row, "end"],
                                regionStart, regionEnd) == TRUE) {
             
-            overlappingPeaks[[gene]][[region]][[mod]] <- rbind(overlappingPeaks[[gene]][[region]][[mod]], peaksPerModification[row,])
+            overlappingPeaks[[mod]][[gene]][[region]] <- rbind(overlappingPeaks[[mod]][[gene]][[region]], peaksPerModification[row,])
             
           }
         }
@@ -40,7 +40,7 @@ overlappingPeaksFunction <- function(geneRegions, allModifications, allRegions, 
       
       overlapSets <- list()
       
-      numberOfOverlappingPeaks <- nrow(overlappingPeaks[[gene]][[region]][[mod]])
+      numberOfOverlappingPeaks <- nrow(overlappingPeaks[[mod]][[gene]][[region]])
       
       if (numberOfOverlappingPeaks > 0) {
         for (row in 1:numberOfOverlappingPeaks) {
@@ -48,8 +48,8 @@ overlappingPeaksFunction <- function(geneRegions, allModifications, allRegions, 
           overlapSets[[row]] <- list()
           
           overlapSets[[row]][["set"]] <- sets::set(as.numeric(row))
-          overlapSets[[row]][["start"]] <- overlappingPeaks[[gene]][[region]][[mod]][row,"start"]
-          overlapSets[[row]][["end"]] <- overlappingPeaks[[gene]][[region]][[mod]][row,"end"]
+          overlapSets[[row]][["start"]] <- overlappingPeaks[[mod]][[gene]][[region]][row,"start"]
+          overlapSets[[row]][["end"]] <- overlappingPeaks[[mod]][[gene]][[region]][row,"end"]
         }
         
         k <- 1
@@ -91,9 +91,9 @@ overlappingPeaksFunction <- function(geneRegions, allModifications, allRegions, 
           start <- overlapSets[[l]][["start"]]
           end <- overlapSets[[l]][["end"]]
           
-          allPeaks[[gene]][[region]][[mod]] <- rbind(allPeaks[[gene]][[region]][[mod]], 
+          allPeaks[[mod]][[gene]][[region]] <- rbind(allPeaks[[mod]][[gene]][[region]], 
                                                      data.frame(gene = gene,
-                                                                seqnames = overlappingPeaks[[gene]][[region]][[mod]]$seqnames[1],
+                                                                seqnames = overlappingPeaks[[mod]][[gene]][[region]]$seqnames[1],
                                                                 start = start,
                                                                 end = end,
                                                                 width = end - start,
