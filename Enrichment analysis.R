@@ -1,22 +1,5 @@
 # Load required libraries.
-library(readxl)
-library(karyoploteR)
-library(rtracklayer)
-library(dplyr)
-library(stringr)
-library(hash)
-library(sets)
-library(ggplot2)
-library(data.table)
-library(grid)
-library(readr)
-library(rstudioapi)
-library(openxlsx)
-library(ggpubr)
-library(rstatix)
-library(tidyverse)
-library(glue)
-library(TxDb.Athaliana.BioMart.plantsmart28)
+
 
 # Enrichment analysis based on the occurrence of significant peaks.
 setwd("C:/Users/jexy2/OneDrive/ChIP-seq-enrichment-analysis")
@@ -31,8 +14,9 @@ source("Functions\\PlantExp.R")
 sampleGenes <- PlantExp()
 
 # Perform enrichment analysis.
-jobRunScript("Script for analysis.R", importEnv = TRUE)
-  
+source("Functions\\analysisFunction.R")
+analysisFunction(sampleGenes, nextflowOutput)
+
 # Plot average gene size between R-genes and control genes.
 geneWidth <- data.frame()
 

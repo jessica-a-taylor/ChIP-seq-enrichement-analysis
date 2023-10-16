@@ -15,10 +15,8 @@ geneRegionAxisLocations <- function(proportion, geneRegions, wb) {
       for (region in allRegions) {
         if (nrow(proportion[[mod]][[gene]][[region]]) >= 1) {
           
-          for (c in 1:length(allRegions)) {
-            proportion[[mod]][[gene]][[region]]$axisGroup <- grouping[which(axisGroup == region)]
-            wb_data <- rbind(wb_data, proportion[[mod]][[gene]][[region]])
-          }
+          proportion[[mod]][[gene]][[region]]$axisGroup <- grouping[which(axisGroup == region)]
+          wb_data <- rbind(wb_data, proportion[[mod]][[gene]][[region]])
         }
       }
     } 
