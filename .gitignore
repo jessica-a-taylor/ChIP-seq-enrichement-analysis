@@ -15,4 +15,5 @@ RData
 .Data/
 .Graphs/
 *.csv
+*.xlsx
 *.fas
