@@ -10,6 +10,7 @@ RData
 *.bed.gz
 *.csv
 *.png
+*.pdf
 *.tsv
 .Data/
 .Graphs/
