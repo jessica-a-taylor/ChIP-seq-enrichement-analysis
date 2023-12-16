@@ -168,17 +168,18 @@ for (mod in unique(nextflowOutput$Mod.TF)) {
     allFrequency_results <- rbind(allFrequency_results, allFrequency)
   }
   
-  my_comparisons <- list(c("controls No Expression", "NLRs No Expression"), 
-                         c("controls Low Expression", "NLRs Low Expression"),
+  my_comparisons <- list(c("Controls No Expression", "NLRs No Expression"), 
+                         c("Controls Low Expression", "NLRs Low Expression"),
                          c("NLRs No Expression", "NLRs Low Expression"))
   
   stat.test <- allProportions_results %>% group_by(axisGroup) %>% 
     t_test(overlap ~ geneSet, comparisons = my_comparisons) %>% 
     mutate(y.position = rep(c(0.98, 0.98, 1.06), times = 10))
   
-  plot <- ggbarplot(allFrequency_results, x = as.factor("geneSet", level = c("controls No Expression", "NLRs No Expression",
-                                                                             "controls Low Expression", "NLRs Low Expression")), 
-                    y="mean.overlap", ylab = "Average enrichment",
+  allFrequency_results$geneSet <- factor(allFrequency_results$geneSet, levels = c("Controls No Expression", "NLRs No Expression",
+                                                                                  "Controls Low Expression", "NLRs Low Expression"))
+  
+  plot <- ggbarplot(allFrequency_results, x = "geneSet", y="mean.overlap", ylab = "Average enrichment",
                     color = "black", fill = "geneSet", 
                     palette = c("azure3", "cadetblue", "bisque2", "lightsalmon2"), 
                     title = mod) + theme_bw() +
