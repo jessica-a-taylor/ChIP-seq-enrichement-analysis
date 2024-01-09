@@ -6,7 +6,7 @@ genomeData <- genomeData[order(genomeData$GeneID),]
 genomeData <- genomeData[-c(which(grepl("Mt", genomeData$seqnames) | grepl("Pt", genomeData$seqnames))),]
 
 # Remove duplicate genes.
-genomeData <- genomeData[which(genomeData$GeneID == str_match(genomeData$GeneID, "^([0-9a-zA-Z]+)([.])(1)$")[,1]),]
+genomeData <- genomeData[which(genomeData$GeneID == str_match(genomeData$GeneID, "^([a-zA-Z0-9]*.1)$")[,2]),]
 
 # Add 'width' and 'ranges' columns.
 source("Functions/Gene width&range.R")
