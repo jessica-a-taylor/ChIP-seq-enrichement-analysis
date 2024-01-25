@@ -209,3 +209,187 @@ for (mod in unique(nextflowOutput$Mod.TF)) {
   print(plot)
   dev.off() 
 }
+
+
+# Plot results with new measure of enrichment.
+for (set in names(sampleGenes)) {
+  for (level in unique(sampleGenes[[set]]$expressionLevel)) {
+    bed <- GRanges(seqnames = sampleGenes[[set]][sampleGenes[[set]]$expressionLevel==level, "seqnames"],
+                   ranges = sampleGenes[[set]][sampleGenes[[set]]$expressionLevel==level, "ranges"],
+                   Gene =sampleGenes[[set]][sampleGenes[[set]]$expressionLevel==level, "Gene"],
+                   Gene_set = paste(set, level, sep = "_"))
+    
+    export.bed(bed, paste0("Arabidopsis NLRs/Data/Bed files/", set, "_", level,".bed"))
+  }
+}
+
+# Plot for H3K27me3.
+scores <- as.data.frame(read_csv("Arabidopsis NLRs/Data/Signal scores/H3K27me3_Profile.csv"))
+colnames(scores) <- c("Region", "Controls No Exp", "NLRs No Exp", "Controls Low Exp", "NLRs Low Exp")
+
+# Restructure the data for ggbarplot.
+meanScore <- data.frame()
+for (region in unique(scores$Region)) {
+  meanScore <- rbind(meanScore, data.frame(Region = rep(region, times = 4),
+                                           GeneSet = colnames(scores)[2:5],
+                                           meanScore = colMeans(scores[scores$Region==region,c(2:5)])))
+} 
+
+scores$Region <- factor(scores$Region, levels = c("Upstream (-1 kb)", "Gene20", "Gene40", "Gene60",
+                                                  "Gene80", "Gene100", "Downstream (+1 kb)"))
+
+meanScore$Region <- factor(meanScore$Region, levels = c("Upstream (-1 kb)", "Gene20", "Gene40", "Gene60",
+                                                        "Gene80", "Gene100", "Downstream (+1 kb)"))
+
+scores <- data.frame(Region = rep(scores$Region, times = 4),
+                     GeneSet = rep(colnames(scores)[2:5], each = nrow(scores)),
+                     Score = c(scores[,2], scores[,3], scores[,4], scores[,5]))
+
+my_comparisons <- list(c("Controls No Exp", "NLRs No Exp"), 
+                       c("Controls Low Exp", "NLRs Low Exp"),
+                       c("NLRs No Exp", "NLRs Low Exp"))
+
+stat.test <- scores %>% group_by(Region) %>% 
+  t_test(Score ~ GeneSet, comparisons = my_comparisons) %>% 
+  mutate(y.position = rep(c(20, 20, 22), times = 7))
+
+plot <- ggbarplot(meanScore, x = "GeneSet", y="meanScore", ylab = "",
+                  color = "black", fill = "GeneSet", 
+                  palette = c("azure3", "cadetblue", "bisque2", "lightsalmon2"), 
+                  title = "H3K27me3") + theme_bw() +
+  stat_pvalue_manual(
+    stat.test, 
+    label = "p.adj.signif", size = 4,
+    tip.length = 0.01, hide.ns = FALSE) +
+ # coord_cartesian(ylim= c(0,1.08), clip = "off") +
+  
+  font("title", size = 16) +
+  font("legend.title", size = 12) +
+  font("legend.text", size = 10) +
+  font("caption", size = 12) 
+
+plot <- facet(plot, facet.by = "Region", nrow = 1, panel.labs.font = list(size = 10),
+              panel.labs = list(Region = c("Upstream (-1 kb)", "0-20% gene", "20-40% gene", "40-60% gene",
+                                           "60-80% gene", "80-100% gene", "Downstream (+1 kb)")))
+
+
+plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
+              font.ytickslab = 8)
+
+pdf("Arabidopsis NLRs/Graphs/Signal scores/H3K27me3.pdf", width = 10, height = 5)
+print(plot)
+dev.off() 
+
+# Plot for H3K4me3.
+scores <- as.data.frame(read_csv("Arabidopsis NLRs/Data/Signal scores/H3K4me3_Profile.csv"))
+colnames(scores) <- c("Region", "Controls No Exp", "NLRs No Exp", "Controls Low Exp", "NLRs Low Exp")
+
+# Restructure the data for ggbarplot.
+meanScore <- data.frame()
+for (region in unique(scores$Region)) {
+  meanScore <- rbind(meanScore, data.frame(Region = rep(region, times = 4),
+                                           GeneSet = colnames(scores)[2:5],
+                                           meanScore = colMeans(scores[scores$Region==region,c(2:5)])))
+} 
+
+scores$Region <- factor(scores$Region, levels = c("Upstream (-1 kb)", "Gene20", "Gene40", "Gene60",
+                                                  "Gene80", "Gene100", "Downstream (+1 kb)"))
+
+meanScore$Region <- factor(meanScore$Region, levels = c("Upstream (-1 kb)", "Gene20", "Gene40", "Gene60",
+                                                        "Gene80", "Gene100", "Downstream (+1 kb)"))
+
+scores <- data.frame(Region = rep(scores$Region, times = 4),
+                     GeneSet = rep(colnames(scores)[2:5], each = nrow(scores)),
+                     Score = c(scores[,2], scores[,3], scores[,4], scores[,5]))
+
+my_comparisons <- list(c("Controls No Exp", "NLRs No Exp"), 
+                       c("Controls Low Exp", "NLRs Low Exp"),
+                       c("NLRs No Exp", "NLRs Low Exp"))
+
+stat.test <- scores %>% group_by(Region) %>% 
+  t_test(Score ~ GeneSet, comparisons = my_comparisons) %>% 
+  mutate(y.position = rep(c(75, 75, 79), times = 7))
+
+plot <- ggbarplot(meanScore, x = "GeneSet", y="meanScore", ylab = "",
+                  color = "black", fill = "GeneSet", 
+                  palette = c("azure3", "cadetblue", "bisque2", "lightsalmon2"), 
+                  title = "H3K4me3") + theme_bw() +
+  stat_pvalue_manual(
+    stat.test, 
+    label = "p.adj.signif", size = 4,
+    tip.length = 0.01, hide.ns = FALSE) +
+  # coord_cartesian(ylim= c(0,1.08), clip = "off") +
+  
+  font("title", size = 16) +
+  font("legend.title", size = 12) +
+  font("legend.text", size = 10) +
+  font("caption", size = 12) 
+
+plot <- facet(plot, facet.by = "Region", nrow = 1, panel.labs.font = list(size = 10),
+              panel.labs = list(Region = c("Upstream (-1 kb)", "0-20% gene", "20-40% gene", "40-60% gene",
+                                           "60-80% gene", "80-100% gene", "Downstream (+1 kb)")))
+
+
+plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
+              font.ytickslab = 8)
+
+pdf("Arabidopsis NLRs/Graphs/Signal scores/H3K4me3.pdf", width = 10, height = 5)
+print(plot)
+dev.off() 
+
+# Plot for H3K36me3.
+scores <- as.data.frame(read_csv("Arabidopsis NLRs/Data/Signal scores/H3K36me3_Profile.csv"))
+colnames(scores) <- c("Region", "Controls No Exp", "NLRs No Exp", "Controls Low Exp", "NLRs Low Exp")
+
+# Restructure the data for ggbarplot.
+meanScore <- data.frame()
+for (region in unique(scores$Region)) {
+  meanScore <- rbind(meanScore, data.frame(Region = rep(region, times = 4),
+                                           GeneSet = colnames(scores)[2:5],
+                                           meanScore = colMeans(scores[scores$Region==region,c(2:5)])))
+} 
+
+scores$Region <- factor(scores$Region, levels = c("Upstream (-1 kb)", "Gene20", "Gene40", "Gene60",
+                                                  "Gene80", "Gene100", "Downstream (+1 kb)"))
+
+meanScore$Region <- factor(meanScore$Region, levels = c("Upstream (-1 kb)", "Gene20", "Gene40", "Gene60",
+                                                        "Gene80", "Gene100", "Downstream (+1 kb)"))
+
+scores <- data.frame(Region = rep(scores$Region, times = 4),
+                     GeneSet = rep(colnames(scores)[2:5], each = nrow(scores)),
+                     Score = c(scores[,2], scores[,3], scores[,4], scores[,5]))
+
+my_comparisons <- list(c("Controls No Exp", "NLRs No Exp"), 
+                       c("Controls Low Exp", "NLRs Low Exp"),
+                       c("NLRs No Exp", "NLRs Low Exp"))
+
+stat.test <- scores %>% group_by(Region) %>% 
+  t_test(Score ~ GeneSet, comparisons = my_comparisons) %>% 
+  mutate(y.position = rep(c(51, 51, 54), times = 7))
+
+plot <- ggbarplot(meanScore, x = "GeneSet", y="meanScore", ylab = "",
+                  color = "black", fill = "GeneSet", 
+                  palette = c("azure3", "cadetblue", "bisque2", "lightsalmon2"), 
+                  title = "H3K36me3") + theme_bw() +
+  stat_pvalue_manual(
+    stat.test, 
+    label = "p.adj.signif", size = 4,
+    tip.length = 0.01, hide.ns = FALSE) +
+  # coord_cartesian(ylim= c(0,1.08), clip = "off") +
+  
+  font("title", size = 16) +
+  font("legend.title", size = 12) +
+  font("legend.text", size = 10) +
+  font("caption", size = 12) 
+
+plot <- facet(plot, facet.by = "Region", nrow = 1, panel.labs.font = list(size = 10),
+              panel.labs = list(Region = c("Upstream (-1 kb)", "0-20% gene", "20-40% gene", "40-60% gene",
+                                           "60-80% gene", "80-100% gene", "Downstream (+1 kb)")))
+
+
+plot <- ggpar(plot, font.xtickslab = FALSE, ticks = FALSE, legend = "bottom", xlab = FALSE, legend.title = "",
+              font.ytickslab = 8)
+
+pdf("Arabidopsis NLRs/Graphs/Signal scores/H3K36me3.pdf", width = 10, height = 5)
+print(plot)
+dev.off() 
